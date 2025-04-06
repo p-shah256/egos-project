@@ -1,0 +1,26 @@
+Name:
+NUID:
+GitHub id:
+slack hours used: 0
+remaining slack hours: 120
+
+Exercise 4:
+Fill in the end address and the size of the memory chunk below.
+
+[0x02000000, 0x2010000): 64K
+[0x08000000, (FILL-IN) ): (FILL-IN)
+[0x10013000, (FILL-IN) ): (FILL-IN)
+[0x20400000, (FILL-IN) ): (FILL-IN)
+[0x80000000, (FILL-IN) ): (FILL-IN)
+
+// What are these addresses?
+// check: https://naizhengtan.github.io/25spring/docs/CPU_mem_v2p.pdf
+
+---
+Collaborators (who you talked to about the lab, what you talked about):
+
+
+Source material that you consulted:
+
+
+Other acknowledgments:

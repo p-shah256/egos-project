@@ -1,0 +1,32 @@
+Name:
+NUID:
+GitHub id:
+slack hours used: 0
+remaining slack hours: 120
+
+---
+Exercise 5:
+
+Q: After uncommenting the line in apps/user/crash3.c,
+   what do you see when running `crash3 proc` in egos?
+   And why?
+   (Explain in fewer than 3 sentences)
+
+A: // write your answers here
+
+
+Q2: Can you prevent `crash3 proc` using PMP?
+    Why and why not?
+   (Explain in fewer than 3 sentences)
+
+A: // write your answers here
+
+
+---
+Collaborators (who you talked to about the lab, what you talked about):
+
+
+Source material that you consulted:
+
+
+Other acknowledgments:
