@@ -8,6 +8,8 @@ IFVM=VMOFF
 DISK=FLASH
 # [lab7]: TODO: change  "RWFSOFF" to "RWFSON"
 RWFS=RWFSOFF
+# Network ON/OFF
+NET=NETON
 
 CPU_TYPE=SIFIVE_U
 
@@ -32,9 +34,10 @@ LDFLAGS = -Wl,--gc-sections -nostartfiles -nostdlib
 INCLUDE = -Ilibrary -Ilibrary/elf -Ilibrary/libc -Ilibrary/file -Ilibrary/servers
 # QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-e31.cfg -kernel $(QEMU)/qemu.elf -nographic
 QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic
+# QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -monitor stdio
 VERBOSE_LINKER = -Xlinker --verbose
 
-COMMON = $(CFLAGS) $(LDFLAGS) $(INCLUDE) -D$(CPU_TYPE) -D CPU_CLOCK_RATE=65000000 -D$(SCHEDULER) -D$(SYSCALLFUNC) -D$(IFVM) -D$(DISK) -D$(RWFS)
+COMMON = $(CFLAGS) $(LDFLAGS) $(INCLUDE) -D$(CPU_TYPE) -D CPU_CLOCK_RATE=65000000 -D$(SCHEDULER) -D$(SYSCALLFUNC) -D$(IFVM) -D$(DISK) -D$(RWFS) -D$(NET)
 
 APPS_LD = -Tapps/app.lds -lc -lgcc
 GRASS_LD = -Tgrass/grass.lds -lc -lgcc

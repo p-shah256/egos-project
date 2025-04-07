@@ -1,0 +1,11 @@
+build
+mkfs
+mkrom
+tags
+.DS_Store
+.ctags
+*.elf
+*.lst
+*.bin
+*.mcs
+*.img

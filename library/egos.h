@@ -130,6 +130,8 @@ extern struct grass *grass;
                             : FATAL("idx2pid: invalid idx"))
 
 /* data types */
+typedef unsigned char m_uint8;
+typedef unsigned short m_uint16;
 typedef unsigned int m_uint32;
 typedef unsigned long long m_uint64;
 
