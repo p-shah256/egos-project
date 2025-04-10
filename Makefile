@@ -33,8 +33,8 @@ CFLAGS = -march=rv32i -mabi=ilp32 -mcmodel=medlow -ffunction-sections -fdata-sec
 LDFLAGS = -Wl,--gc-sections -nostartfiles -nostdlib
 INCLUDE = -Ilibrary -Ilibrary/elf -Ilibrary/libc -Ilibrary/file -Ilibrary/servers
 # QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-e31.cfg -kernel $(QEMU)/qemu.elf -nographic
-QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic
-# QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -monitor stdio
+#QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic
+QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic -nic bridge,helper=/usr/lib/qemu/qemu-bridge-helper
 VERBOSE_LINKER = -Xlinker --verbose
 
 COMMON = $(CFLAGS) $(LDFLAGS) $(INCLUDE) -D$(CPU_TYPE) -D CPU_CLOCK_RATE=65000000 -D$(SCHEDULER) -D$(SYSCALLFUNC) -D$(IFVM) -D$(DISK) -D$(RWFS) -D$(NET)
@@ -108,14 +108,14 @@ qemu:
 	@echo "$(YELLOW)-------- Simulate on QEMU-RISCV --------$(END)"
 	cp $(RELEASE)/earth.elf $(QEMU)/egos.bin
 	$(OBJCOPY) --update-section .image=$(TOOLS)/disk.img $(QEMU)/egos.bin
-	$(RISCV_QEMU) $(QEMU_FLAGS)
+	sudo $(RISCV_QEMU) $(QEMU_FLAGS)
 
 qemu-gdb:
 	@echo "$(YELLOW)-------- Simulate on QEMU-RISCV (with GDB) --------$(END)"
 	@echo "$(YELLOW)-------- run 'gdb' in another window --------$(END)"
 	cp $(RELEASE)/earth.elf $(QEMU)/egos.bin
 	$(OBJCOPY) --update-section .image=$(TOOLS)/disk.img $(QEMU)/egos.bin
-	$(RISCV_QEMU) $(QEMU_FLAGS) -S $(QEMUGDB)
+	sudo $(RISCV_QEMU) $(QEMU_FLAGS) -S $(QEMUGDB)
 
 clean:
 	rm -rf build

@@ -297,7 +297,7 @@ void delay() {
     for (int i = 0;i < BUSY_LOOP;++i);
 }
 
-void _macb_send(void *packet, int length) {
+void macb_send(void *packet, int length) {
     unsigned long ctrl;
     unsigned int tx_head = macb.tx_head;
     int i;
@@ -318,15 +318,19 @@ void _macb_send(void *packet, int length) {
     flush_dcache_range(macb.tx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
     macb_writel(macb, NCR, MACB_BIT(TE) | MACB_BIT(RE) | MACB_BIT(TSTART));
 
+    INFO("Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
     /*
     * I guess this is necessary because the networking core may
     * re-use the transmit buffer as soon as we return...
     */
     for (i = 0; i <= MACB_TX_TIMEOUT; i++) {
         barrier();
+	INFO("Testing %d", i);
         // invalidate_cache(macb.tx_ring_dma[0], MACB_TX_DMA_DESC_SIZE);
         ctrl = macb.tx_ring[tx_head].ctrl;
+    INFO("Test Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
         if (ctrl & MACB_BIT(TX_USED))
+		INFO("Used %d", i);
             break;
         delay();
     }
@@ -441,4 +445,28 @@ int _macb_recv(unsigned char **packetp) {
         }
         barrier();
     }
+}
+
+void macb_test() {
+	m_uint8 dummy_frame[60] = {
+	    // Destination MAC (Broadcast)
+	    0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+
+	    // Source MAC (your device's MAC)
+	    0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
+
+	    // Ethertype (0x88B5 = Dummy/Experimental)
+	    0x88, 0xB5,
+
+	    // Payload (46 bytes of arbitrary data)
+	    'H', 'E', 'L', 'L', 'O', '-', 'F', 'R', 'O', 'M', '-', 'G', 'E', 'M', '-', 'D',
+	    'U', 'M', 'M', 'Y', '-', 'P', 'A', 'C', 'K', 'E', 'T', '-', 'T', 'E', 'S', 'T',
+	    '-', 'Y', 'A', 'Y', '!', ' ', 'i', 't', 'r', ':', ' ', 0x00, 0x00,
+	};
+	int itr = 5;
+	for (int i = 0;i < 5;++i) {
+		dummy_frame[58] = ('1' + i);
+		macb_send(&dummy_frame, 60);
+	}
+
 }
