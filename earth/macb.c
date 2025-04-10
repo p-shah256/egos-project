@@ -293,8 +293,8 @@ void invalidate_cache(m_uint32 start_addr, m_uint32 size) {
     asm volatile("fence");
 }
 
-void delay() {
-    for (int i = 0;i < BUSY_LOOP;++i);
+void delay(int itrs) {
+    for (int i = 0;i < itrs;++i);
 }
 
 void macb_send(void *packet, int length) {
@@ -332,7 +332,7 @@ void macb_send(void *packet, int length) {
         if (ctrl & MACB_BIT(TX_USED))
 		INFO("Used %d", i);
             break;
-        delay();
+        delay(BUSY_LOOP);
     }
 
     if (i <= MACB_TX_TIMEOUT) {
@@ -394,7 +394,7 @@ void reclaim_rx_buffers(unsigned int new_tail) {
 }
 
 
-int _macb_recv(unsigned char **packetp) {
+int macb_recv(unsigned char **packetp) {
     macb.next_rx_tail = macb.rx_tail;
 	macb.wrapped = 0;
     unsigned int next_rx_tail = macb.next_rx_tail;
@@ -423,6 +423,7 @@ int _macb_recv(unsigned char **packetp) {
 
             // macb_invalidate_rx_buffer(macb);
             if (macb.wrapped) {
+		    printf("Wrapped! len: %d", length);
                 unsigned int headlen, taillen;
 
                 headlen = macb.rx_buffer_size * (MACB_RX_RING_SIZE - macb.rx_tail);
@@ -469,4 +470,19 @@ void macb_test() {
 		macb_send(&dummy_frame, 60);
 	}
 
+	int num = 0;
+	unsigned char buffer[2000];
+	unsigned char* recv_buffer = buffer;
+	while(1) {
+		num = macb_recv(&recv_buffer);
+		reclaim_rx_buffers(macb.next_rx_tail);
+		if (num > 0) {
+			printf("Received: %d bytes\n", num);
+			for (int i = 0;i < num;++i) {
+				printf("%c", buffer[i]);
+			}
+			printf("\n");
+		}
+		delay(1e5);
+	}
 }
