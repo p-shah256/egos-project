@@ -21,7 +21,7 @@ int main() {
     grass->sys_send(GPID_PROCESS, buf, 32);
 
     while (1) {
-        int sender, r;
+        int sender, len;
         struct net_request *req = (void*)buf;
         struct net_reply *reply = (void*)buf;
         sender = 0;
@@ -30,10 +30,12 @@ int main() {
         switch (req->type) {
             case NET_SEND:
                 earth->net_send(req->length, (void*)req->buf);
+                reply->status = NET_OK;
                 grass->sys_send(sender, (void*)reply, sizeof(*reply));
                 break;
             case NET_RECV:
-                reply->length = earth->net_recv(reply->buf);
+                reply->length = earth->net_recv(reply->buf);              
+                reply->status = NET_OK;
                 grass->sys_send(sender, (void*)reply, sizeof(*reply));
                 break;
             default:

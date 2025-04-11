@@ -62,9 +62,9 @@ struct macb_device {
 	m_uint32	    rx_buffer_dma[2];
 	m_uint32		rx_ring_dma[2];
 	m_uint32		tx_ring_dma[2];
-    
-    unsigned long		pclk_rate;
-    unsigned short		phy_addr;
+
+	unsigned long		pclk_rate;
+	unsigned short		phy_addr;
 };
 
 typedef struct macb_device macb_device;
@@ -87,32 +87,32 @@ m_uint32 macb_mdc_clk_div(unsigned long macb_hz) {
 }
 
 void* alloc_aligned(m_uint32 size, m_uint32* handle) {
-    int offset = ARCH_DMA_MINALIGN - 1;
-    void* alloc_start;
-    if ((alloc_start = (void*)malloc(size + offset)) == NULL) {
-       FATAL("Not enough memory");
-    }
-    *handle = (m_uint32)alloc_start;
+	int offset = ARCH_DMA_MINALIGN - 1;
+	void* alloc_start;
+	if ((alloc_start = (void*)malloc(size + offset)) == NULL) {
+		FATAL("Not enough memory");
+	}
+	*handle = (m_uint32)alloc_start;
 
-    return (void*)(((size_t)(alloc_start) + offset) & ~(ARCH_DMA_MINALIGN - 1));
+	return (void*)(((size_t)(alloc_start) + offset) & ~(ARCH_DMA_MINALIGN - 1));
 }
 
 void macb_probe() {
-    // Base of register offsets
+	// Base of register offsets
 	macb.base = (void *)(0x10090000);
 	macb.pclk_rate = QUANTUM; //  Configure based on the inputs
 
 	macb.rx_buffer_size = MACB_RX_BUFFER_SIZE;
 	// Malloc with DMA aligned sync it with D-cache line size ?
 	macb.rx_buffer = alloc_aligned(macb.rx_buffer_size * MACB_RX_RING_SIZE, &macb.rx_buffer_dma[1]);
-    macb.rx_buffer_dma[0] = (m_uint32)macb.rx_buffer;
+	macb.rx_buffer_dma[0] = (m_uint32)macb.rx_buffer;
 
-    macb.rx_ring = alloc_aligned(MACB_RX_DMA_DESC_SIZE, &macb.rx_ring_dma[1]);
-    macb.rx_ring_dma[0] = (m_uint32)macb.rx_ring;
-	
-    macb.tx_ring = alloc_aligned(MACB_TX_DMA_DESC_SIZE, &macb.tx_ring_dma[1]);
-    macb.tx_ring_dma[0] = (m_uint32)macb.tx_ring;
-    
+	macb.rx_ring = alloc_aligned(MACB_RX_DMA_DESC_SIZE, &macb.rx_ring_dma[1]);
+	macb.rx_ring_dma[0] = (m_uint32)macb.rx_ring;
+
+	macb.tx_ring = alloc_aligned(MACB_TX_DMA_DESC_SIZE, &macb.tx_ring_dma[1]);
+	macb.tx_ring_dma[0] = (m_uint32)macb.tx_ring;
+
 	m_uint32 ncfgr = macb_mdc_clk_div(macb.pclk_rate);
 	macb_writel(macb, NCFGR, ncfgr);
 }
@@ -127,10 +127,10 @@ m_uint16 macb_mdio_read(m_uint8 phy_adr, m_uint8 reg) {
 	macb_writel(macb, NCR, netctl);
 
 	frame = (MACB_BF(SOF, 1)
-		 | MACB_BF(RW, 2)
-		 | MACB_BF(PHYA, phy_adr)
-		 | MACB_BF(REGA, reg)
-		 | MACB_BF(CODE, 2));
+		| MACB_BF(RW, 2)
+		| MACB_BF(PHYA, phy_adr)
+		| MACB_BF(REGA, reg)
+		| MACB_BF(CODE, 2));
 	macb_writel(macb, MAN, frame);
 
 	do {
@@ -178,7 +178,7 @@ unsigned int mii_nway_result (unsigned int negotiated) {
 }
 
 void barrier() {
-    asm volatile("fence");
+	asm volatile("fence");
 }
 
 int macb_phy_init()
@@ -187,26 +187,26 @@ int macb_phy_init()
 	m_uint16 phy_id, status, adv, lpa;
 	int media, speed, duplex;
 
-    macb.phy_addr = 0; // Could check for all the PHYs from 0 to 32
-    phy_id = macb_mdio_read(macb.phy_addr, MII_PHYSID1);
-    if (phy_id == 0xffff) {
-        FATAL("No PHY present\n");
-        return -1;
-    }
+	macb.phy_addr = 0; // Could check for all the PHYs from 0 to 32
+	phy_id = macb_mdio_read(macb.phy_addr, MII_PHYSID1);
+	if (phy_id == 0xffff) {
+		FATAL("No PHY present\n");
+		return -1;
+	}
 
-    status = macb_mdio_read(macb.phy_addr, MII_BMSR);
-    if (!(status & BMSR_LSTATUS)) {
-        FATAL("Link down (status: 0x%04x)\n", status);
-        return -1;
-    }
+	status = macb_mdio_read(macb.phy_addr, MII_BMSR);
+	if (!(status & BMSR_LSTATUS)) {
+		FATAL("Link down (status: 0x%04x)\n", status);
+		return -1;
+	}
 
-    adv = macb_mdio_read(macb.phy_addr, MII_ADVERTISE);
-    lpa = macb_mdio_read(macb.phy_addr, MII_LPA);
-    media = mii_nway_result(lpa & adv);
-    speed = (media & (ADVERTISE_100FULL | ADVERTISE_100HALF) ? 1 : 0);
-    duplex = (media & ADVERTISE_FULL) ? 1 : 0;
+	adv = macb_mdio_read(macb.phy_addr, MII_ADVERTISE);
+	lpa = macb_mdio_read(macb.phy_addr, MII_LPA);
+	media = mii_nway_result(lpa & adv);
+	speed = (media & (ADVERTISE_100FULL | ADVERTISE_100HALF) ? 1 : 0);
+	duplex = (media & ADVERTISE_FULL) ? 1 : 0;
 
-    CRITICAL("PHY Link up, %sMbps %s-duplex (lpa: 0x%04x)", speed ? "100" : "10", duplex ? "full" : "half", lpa);
+	CRITICAL("PHY Link up, %sMbps %s-duplex (lpa: 0x%04x)", speed ? "100" : "10", duplex ? "full" : "half", lpa);
 
 	ncfgr = macb_readl(macb, NCFGR);
 	ncfgr &= ~(MACB_BIT(SPD) | MACB_BIT(FD) | GEM_BIT(GBE));
@@ -215,25 +215,25 @@ int macb_phy_init()
 	}
 	if (duplex)
 		ncfgr |= MACB_BIT(FD);
-	
-    macb_writel(macb, NCFGR, ncfgr);
+
+	macb_writel(macb, NCFGR, ncfgr);
 
 	return 0;
 }
 
 void flush_dcache_range(unsigned long start_addr, unsigned long size) {
-    unsigned long end_addr = start_addr + size;
-    
-    // Align to 32-byte or 64-byte boundary depending on which you need
-    // For 64-byte alignment (matching cache line size):
-    start_addr &= ~(64UL - 1);
-    
-    for (unsigned long addr = start_addr; addr < end_addr; addr += 64) {
-        REGW(CACHE_CONTROLLER_BASE, CACHE_FLUSH_64) = addr;
+	unsigned long end_addr = start_addr + size;
 
-        // Memory barrier to ensure completion
-        barrier();
-    }
+	// Align to 32-byte or 64-byte boundary depending on which you need
+	// For 64-byte alignment (matching cache line size):
+	start_addr &= ~(64UL - 1);
+
+	for (unsigned long addr = start_addr; addr < end_addr; addr += 64) {
+		REGW(CACHE_CONTROLLER_BASE, CACHE_FLUSH_64) = addr;
+
+		// Memory barrier to ensure completion
+		barrier();
+	}
 }
 
 void macb_start() {
@@ -252,9 +252,9 @@ void macb_start() {
 	}
 	flush_dcache_range(macb.rx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
 	flush_dcache_range((m_uint32)macb.rx_buffer, macb.rx_buffer_size * MACB_RX_RING_SIZE);
-    // INFO("Size of dma_desc: %d", sizeof(struct macb_dma_desc));
+	// INFO("Size of dma_desc: %d", sizeof(struct macb_dma_desc));
 	for (i = 0; i < MACB_TX_RING_SIZE; i++) {
-        // INFO("i = %d", i);
+		// INFO("i = %d", i);
 		macb.tx_ring[i].addr = 0;
 		if (i == (MACB_TX_RING_SIZE - 1))
 			macb.tx_ring[i].ctrl = MACB_BIT(TX_USED) |
@@ -272,85 +272,85 @@ void macb_start() {
 	macb_writel(macb, RBQP, macb.rx_ring_dma[0]);
 	macb_writel(macb, TBQP, macb.tx_ring_dma[0]);
 
-    macb_writel(macb, USRIO, MACB_BIT(MII));
+	macb_writel(macb, USRIO, MACB_BIT(MII));
 
 	macb_phy_init();
-	
+
 	/* Enable TX and RX */
 	macb_writel(macb, NCR, MACB_BIT(TE) | MACB_BIT(RE));
 }
 
 void invalidate_cache(m_uint32 start_addr, m_uint32 size) {
-    // unsigned long end_addr = start_addr + size;
+	// unsigned long end_addr = start_addr + size;
 
-    // // Invalidate each cache line in the range
-    // for (unsigned long addr = start_addr; addr < end_addr; addr += 64) {
-    //     // CBO.INVAL invalidates without writing back
-    //     asm volatile("cbo.inval (%0)" :: "r"(addr));
-    // }
-    
-    // Ensure invalidation is complete
-    asm volatile("fence");
+	// // Invalidate each cache line in the range
+	// for (unsigned long addr = start_addr; addr < end_addr; addr += 64) {
+	//     // CBO.INVAL invalidates without writing back
+	//     asm volatile("cbo.inval (%0)" :: "r"(addr));
+	// }
+
+	// Ensure invalidation is complete
+	asm volatile("fence");
 }
 
 void delay(int itrs) {
-    for (int i = 0;i < itrs;++i);
+	for (int i = 0;i < itrs;++i);
 }
 
 void macb_send(int length, void *packet) {
-    unsigned long ctrl;
-    unsigned int tx_head = macb.tx_head;
-    int i;
+	unsigned long ctrl;
+	unsigned int tx_head = macb.tx_head;
+	int i;
 
-    ctrl = length & TXBUF_FRMLEN_MASK;
-    ctrl |= MACB_BIT(TX_LAST);
-    if (tx_head == (MACB_TX_RING_SIZE - 1)) {
-        ctrl |= MACB_BIT(TX_WRAP);
-        macb.tx_head = 0;
-    } else {
-        macb.tx_head++;
-    }
+	ctrl = length & TXBUF_FRMLEN_MASK;
+	ctrl |= MACB_BIT(TX_LAST);
+	if (tx_head == (MACB_TX_RING_SIZE - 1)) {
+		ctrl |= MACB_BIT(TX_WRAP);
+		macb.tx_head = 0;
+	} else {
+		macb.tx_head++;
+	}
 
-    macb.tx_ring[tx_head].ctrl = ctrl;
-    macb.tx_ring[tx_head].addr = (m_uint32)packet;
+	macb.tx_ring[tx_head].ctrl = ctrl;
+	macb.tx_ring[tx_head].addr = (m_uint32)packet;
 
-    barrier();
-    flush_dcache_range(macb.tx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
-    macb_writel(macb, NCR, MACB_BIT(TE) | MACB_BIT(RE) | MACB_BIT(TSTART));
+	barrier();
+	flush_dcache_range(macb.tx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
+	macb_writel(macb, NCR, MACB_BIT(TE) | MACB_BIT(RE) | MACB_BIT(TSTART));
 
-    INFO("Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
-    /*
+	INFO("Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
+	/*
     * I guess this is necessary because the networking core may
     * re-use the transmit buffer as soon as we return...
     */
-    for (i = 0; i <= MACB_TX_TIMEOUT; i++) {
-        barrier();
-	INFO("Testing %d", i);
-        // invalidate_cache(macb.tx_ring_dma[0], MACB_TX_DMA_DESC_SIZE);
-        ctrl = macb.tx_ring[tx_head].ctrl;
-    INFO("Test Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
-        if (ctrl & MACB_BIT(TX_USED))
-		INFO("Used %d", i);
-            break;
-        delay(BUSY_LOOP);
-    }
+	for (i = 0; i <= MACB_TX_TIMEOUT; i++) {
+		barrier();
+		INFO("Testing %d", i);
+		// invalidate_cache(macb.tx_ring_dma[0], MACB_TX_DMA_DESC_SIZE);
+		ctrl = macb.tx_ring[tx_head].ctrl;
+		INFO("Test Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
+		if (ctrl & MACB_BIT(TX_USED))
+			INFO("Used %d", i);
+		break;
+		delay(BUSY_LOOP);
+	}
 
-    if (i <= MACB_TX_TIMEOUT) {
-        if (ctrl & MACB_BIT(TX_UNDERRUN))
-            CRITICAL("TX underrun");
-        if (ctrl & MACB_BIT(TX_BUF_EXHAUSTED))
-            CRITICAL("TX buffers exhausted in mid frame");
-    } else {
-        CRITICAL("TX timeout");
-    }
+	if (i <= MACB_TX_TIMEOUT) {
+		if (ctrl & MACB_BIT(TX_UNDERRUN))
+			CRITICAL("TX underrun");
+		if (ctrl & MACB_BIT(TX_BUF_EXHAUSTED))
+			CRITICAL("TX buffers exhausted in mid frame");
+	} else {
+		CRITICAL("TX timeout");
+	}
 }
 
 static void reclaim_rx_buffer(unsigned int idx) {
-    unsigned int mask;
-    unsigned int shift;
-    unsigned int i;
+	unsigned int mask;
+	unsigned int shift;
+	unsigned int i;
 
-    /*
+	/*
     * There may be multiple descriptors per CPU cacheline,
     * so a cache flush would flush the whole line, meaning the content of other descriptors
     * in the cacheline would also flush. If one of the other descriptors had been
@@ -360,109 +360,108 @@ static void reclaim_rx_buffer(unsigned int idx) {
     * the last descriptor in the current cacheline. When the current descriptor is the
     * last in the cacheline, we free all the descriptors that belong to that cacheline.
     */
-    mask = DESC_PER_CACHELINE_32 - 1;
-    shift = 0;
+	mask = DESC_PER_CACHELINE_32 - 1;
+	shift = 0;
 
-    /* we exit without freeing if idx is not the last descriptor in the cacheline */
-    if ((idx & mask) != mask)
-        return;
+	/* we exit without freeing if idx is not the last descriptor in the cacheline */
+	if ((idx & mask) != mask)
+		return;
 
-    for (i = idx & (~mask); i <= idx; i++)
-        macb.rx_ring[i << shift].addr &= ~MACB_BIT(RX_USED);
+	for (i = idx & (~mask); i <= idx; i++)
+		macb.rx_ring[i << shift].addr &= ~MACB_BIT(RX_USED);
 }
 
 void reclaim_rx_buffers(unsigned int new_tail) {
-    unsigned int i;
-    i = macb.rx_tail;
+	unsigned int i;
+	i = macb.rx_tail;
 
-    // macb_invalidate_ring_desc(macb, RX);
-    while (i > new_tail) {
-        reclaim_rx_buffer(i);
-        i++;
-        if (i >= MACB_RX_RING_SIZE)
-            i = 0;
-    }
+	// macb_invalidate_ring_desc(macb, RX);
+	while (i > new_tail) {
+		reclaim_rx_buffer(i);
+		i++;
+		if (i >= MACB_RX_RING_SIZE)
+			i = 0;
+	}
 
-    while (i < new_tail) {
-        reclaim_rx_buffer(i);
-        i++;
-    }
+	while (i < new_tail) {
+		reclaim_rx_buffer(i);
+		i++;
+	}
 
-    barrier();
-    flush_dcache_range(macb.rx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
-    macb.rx_tail = new_tail;
+	barrier();
+	flush_dcache_range(macb.rx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
+	macb.rx_tail = new_tail;
 }
 
 
-int _macb_recv(unsigned char **packetp) {
-    macb.next_rx_tail = macb.rx_tail;
+int _macb_recv(void *packetp) {
+	macb.next_rx_tail = macb.rx_tail;
 	macb.wrapped = 0;
-    unsigned int next_rx_tail = macb.next_rx_tail;
-    void *buffer;
-    int length;
-    m_uint32 status;
-    m_uint8 flag = 0;
+	unsigned int next_rx_tail = macb.next_rx_tail;
+	void *buffer;
+	int length;
+	m_uint32 status;
+	m_uint8 flag = 0;
 
-    macb.wrapped = 0;
-    for (;;) {
-        // macb_invalidate_ring_desc(macb, RX);
+	macb.wrapped = 0;
+	for (;;) {
+		// macb_invalidate_ring_desc(macb, RX);
 
-        if (!(macb.rx_ring[next_rx_tail].addr & MACB_BIT(RX_USED)))
-            return -1;
+		if (!(macb.rx_ring[next_rx_tail].addr & MACB_BIT(RX_USED)))
+			return -1;
 
-        status = macb.rx_ring[next_rx_tail].ctrl;
-        if (status & MACB_BIT(RX_SOF)) {
-            if (next_rx_tail != macb.rx_tail)
-                reclaim_rx_buffers(next_rx_tail);
-            macb.wrapped = 0;
-        }
+		status = macb.rx_ring[next_rx_tail].ctrl;
+		if (status & MACB_BIT(RX_SOF)) {
+			if (next_rx_tail != macb.rx_tail)
+				reclaim_rx_buffers(next_rx_tail);
+			macb.wrapped = 0;
+		}
 
-        if (status & MACB_BIT(RX_EOF)) {
-            buffer = macb.rx_buffer + macb.rx_buffer_size * macb.rx_tail;
-            length = status & RXBUF_FRMLEN_MASK;
+		if (status & MACB_BIT(RX_EOF)) {
+			buffer = macb.rx_buffer + macb.rx_buffer_size * macb.rx_tail;
+			length = status & RXBUF_FRMLEN_MASK;
+			ASSERT(length < 256, "Cannot handle packets more than 256 bytes right now!");
+			// macb_invalidate_rx_buffer(macb);
+			if (macb.wrapped) {
+				unsigned int headlen, taillen;
 
-            // macb_invalidate_rx_buffer(macb);
-            if (macb.wrapped) {
-		    printf("Wrapped! len: %d", length);
-                unsigned int headlen, taillen;
+				headlen = macb.rx_buffer_size * (MACB_RX_RING_SIZE - macb.rx_tail);
+				taillen = length - headlen;
+				memcpy(packetp, buffer, headlen);
+				memcpy(packetp + headlen, macb.rx_buffer, taillen);
+			} else {
+				memcpy(packetp, buffer, length);
+			}
 
-                headlen = macb.rx_buffer_size * (MACB_RX_RING_SIZE - macb.rx_tail);
-                taillen = length - headlen;
-                memcpy((void *)*packetp, buffer, headlen);
-                memcpy((void *)*packetp + headlen, macb.rx_buffer, taillen);
-            } else {
-                memcpy((void *)*packetp, buffer, length);
-            }
-
-            if (++next_rx_tail >= MACB_RX_RING_SIZE)
-                next_rx_tail = 0;
-            macb.next_rx_tail = next_rx_tail;
-            return length;
-        } else {
-            if (++next_rx_tail >= MACB_RX_RING_SIZE) {
-                macb.wrapped = 1;
-                next_rx_tail = 0;
-            }
-        }
-        barrier();
-    }
+			if (++next_rx_tail >= MACB_RX_RING_SIZE)
+				next_rx_tail = 0;
+			macb.next_rx_tail = next_rx_tail;
+			return length;
+		} else {
+			if (++next_rx_tail >= MACB_RX_RING_SIZE) {
+				macb.wrapped = 1;
+				next_rx_tail = 0;
+			}
+		}
+		barrier();
+	}
 }
 
 void macb_test() {
 	m_uint8 dummy_frame[60] = {
-	    // Destination MAC (Broadcast)
-	    0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+		// Destination MAC (Broadcast)
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 
-	    // Source MAC (your device's MAC)
-	    0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
+		// Source MAC (your device's MAC)
+		0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
 
-	    // Ethertype (0x88B5 = Dummy/Experimental)
-	    0x88, 0xB5,
+		// Ethertype (0x88B5 = Dummy/Experimental)
+		0x88, 0xB5,
 
-	    // Payload (46 bytes of arbitrary data)
-	    'H', 'E', 'L', 'L', 'O', '-', 'F', 'R', 'O', 'M', '-', 'G', 'E', 'M', '-', 'D',
-	    'U', 'M', 'M', 'Y', '-', 'P', 'A', 'C', 'K', 'E', 'T', '-', 'T', 'E', 'S', 'T',
-	    '-', 'Y', 'A', 'Y', '!', ' ', 'i', 't', 'r', ':', ' ', 0x00, 0x00,
+		// Payload (46 bytes of arbitrary data)
+		'H', 'E', 'L', 'L', 'O', '-', 'F', 'R', 'O', 'M', '-', 'G', 'E', 'M', '-', 'D',
+		'U', 'M', 'M', 'Y', '-', 'P', 'A', 'C', 'K', 'E', 'T', '-', 'T', 'E', 'S', 'T',
+		'-', 'Y', 'A', 'Y', '!', ' ', 'i', 't', 'r', ':', ' ', 0x00, 0x00,
 	};
 	int itr = 5;
 	for (int i = 0;i < 5;++i) {
@@ -487,23 +486,30 @@ void macb_test() {
 	}
 }
 
-int macb_recv(void* buffer) {
-	unsigned char* buf = (unsigned char*)buffer;
-	int len = _macb_recv(&buf);
-	reclaim_rx_buffers(macb.next_rx_tail);
+#define MAX_TIME 1e3
 
-	return len;
+int macb_recv(void* buffer) {
+	for(int i = 0;i < MAX_TIME;++i) {
+		int num = _macb_recv(buffer);
+		if (num > 0) {
+			reclaim_rx_buffers(macb.next_rx_tail);
+			return num;
+		}
+		delay(1e5);
+	}
+
+	return -1;
 }
 
 void macb_init() {
 
-    #ifdef NETON
-        macb_probe();
-        macb_start();
-//	macb_test();
-//	SUCCESS("Finished TEST successfully");
-    #endif
-	
+#ifdef NETON
+	macb_probe();
+	macb_start();
+	//	macb_test();
+	//	SUCCESS("Finished TEST successfully");
+#endif
+
 	earth->net_send = macb_send;
 	earth->net_recv = macb_recv;
 
