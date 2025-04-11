@@ -25,24 +25,25 @@
 #include "file.h"
 #include "fs.h"
 
-#define NKERNEL_PROC 5
+#define NKERNEL_PROC 6
 char* kernel_processes[] = {
                             "../build/release/grass.elf",
                             "../build/release/sys_proc.elf",
                             "../build/release/sys_file.elf",
                             "../build/release/sys_dir.elf",
+                            "../build/release/sys_net.elf",
                             "../build/release/sys_shell.elf",
 };
 
 /* Inode - File/Directory mappings:
-#0: /              #1: /home                #2: /home/cs6640  #3: /home/cheng
-#4: /home/ta       #5: /home/cs6640/README  #6: /bin          #7: /bin/echo
-#8: /bin/cat       #9: /bin/ls              #10:/bin/cd       #11:/bin/pwd
-#12:/bin/clock     #13:/bin/crash1          #14:/bin/crash2   #15:/bin/ult
-#16:/bin/memloop   #17:/bin/helloworld      #18:/bin/loop     #19:/bin/crash3
-#20:/bin/append    #21:/bin/fstest          #23:/home/cs6640/fs (ino=100)
+#0: /              #1: /home                #2: /home/cs6640    #3: /home/cheng
+#4: /home/ta       #5: /home/cs6640/README  #6: /bin            #7: /bin/echo
+#8: /bin/cat       #9: /bin/ls              #10:/bin/cd         #11:/bin/pwd
+#12:/bin/clock     #13:/bin/crash1          #14:/bin/crash2     #15:/bin/ult
+#16:/bin/memloop   #17:/bin/helloworld      #18:/bin/loop       #19:/bin/crash3
+#20:/bin/append    #21:/bin/fstest          #22:/bin/net_sender #23:/bin/net_receiver #23:/home/cs6640/fs (ino=100)
 */
-#define NINODE 23
+#define NINODE 25
 char* contents[] = {
                     "./   0 ../   0 home/   1   bin/   6 ",
                     "./   1 ../   0 cs6640/ 2   cheng/   3 ta/   4 ",
@@ -50,7 +51,7 @@ char* contents[] = {
                     "./   3 ../   1 ",
                     "./   4 ../   1 ",
                     "Welcome to CS6640 labs. \nThis OS is tailored from egos-2000 (https://github.com/yhzhang0128/egos-2000).\n",
-                    "./   6 ../   0 echo   7 cat   8 ls   9 cd  10 pwd  11 clock  12 crash1  13 crash2  14 ult  15 memloop 16 helloworld 17 loop 18 crash3 19 append 20 fstest 21",
+                    "./   6 ../   0 echo   7 cat   8 ls   9 cd  10 pwd  11 clock  12 crash1  13 crash2  14 ult  15 memloop 16 helloworld 17 loop 18 crash3 19 append 20 fstest 21 net_sender 22 net_receiver 23",
                     "#../build/release/echo.elf",
                     "#../build/release/cat.elf",
                     "#../build/release/ls.elf",
@@ -66,6 +67,8 @@ char* contents[] = {
                     "#../build/release/crash3.elf",
                     "#../build/release/append.elf",
                     "#../build/release/fstest.elf",
+                    "#../build/release/net_sender.elf",
+                    "#../build/release/net_receiver.elf",
                     "./   100 ../ 2 ", // dummy, entry to rwfs
 };
 

@@ -99,7 +99,6 @@ int main() {
                 grass->sys_send(GPID_PROCESS, (void*)&req, sizeof(req));
             } else {
                 req.type = PROC_SPAWN;
-
                 if (0 != parse_request(nextcmd, &req)) {
                     INFO("sys_shell: too many arguments or argument too long");
                 } else {

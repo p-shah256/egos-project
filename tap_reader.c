@@ -31,13 +31,13 @@ int tun_alloc(const char *devname) {
 }
 
 int main() {
-    int fd = tun_alloc("tap0");
+    int fd = tun_alloc("tap3");
     if (fd < 0) {
-        fprintf(stderr, "Failed to open tap0\n");
+        fprintf(stderr, "Failed to open tap3\n");
         return 1;
     }
 
-    printf("Listening on tap0...\n");
+    printf("Listening on tap3...\n");
 
     unsigned char buffer[1600];
     while (1) {

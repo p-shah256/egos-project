@@ -297,7 +297,7 @@ void delay(int itrs) {
     for (int i = 0;i < itrs;++i);
 }
 
-void macb_send(void *packet, int length) {
+void macb_send(int length, void *packet) {
     unsigned long ctrl;
     unsigned int tx_head = macb.tx_head;
     int i;
@@ -394,7 +394,7 @@ void reclaim_rx_buffers(unsigned int new_tail) {
 }
 
 
-int macb_recv(unsigned char **packetp) {
+int _macb_recv(unsigned char **packetp) {
     macb.next_rx_tail = macb.rx_tail;
 	macb.wrapped = 0;
     unsigned int next_rx_tail = macb.next_rx_tail;
@@ -467,14 +467,14 @@ void macb_test() {
 	int itr = 5;
 	for (int i = 0;i < 5;++i) {
 		dummy_frame[58] = ('1' + i);
-		macb_send(&dummy_frame, 60);
+		macb_send(60, &dummy_frame);
 	}
 
 	int num = 0;
 	unsigned char buffer[2000];
 	unsigned char* recv_buffer = buffer;
 	while(1) {
-		num = macb_recv(&recv_buffer);
+		num = _macb_recv(&recv_buffer);
 		reclaim_rx_buffers(macb.next_rx_tail);
 		if (num > 0) {
 			printf("Received: %d bytes\n", num);
@@ -485,4 +485,26 @@ void macb_test() {
 		}
 		delay(1e5);
 	}
+}
+
+int macb_recv(void* buffer) {
+	unsigned char* buf = (unsigned char*)buffer;
+	int len = _macb_recv(&buf);
+	reclaim_rx_buffers(macb.next_rx_tail);
+
+	return len;
+}
+
+void macb_init() {
+
+    #ifdef NETON
+        macb_probe();
+        macb_start();
+//	macb_test();
+//	SUCCESS("Finished TEST successfully");
+    #endif
+	
+	earth->net_send = macb_send;
+	earth->net_recv = macb_recv;
+
 }

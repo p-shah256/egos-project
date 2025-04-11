@@ -18,6 +18,9 @@ struct earth {
     int (*disk_read)(int block_no, int nblocks, char* dst);
     int (*disk_write)(int block_no, int nblocks, char* src);
 
+    void (*net_send)(int length, void* packet);
+    int (*net_recv)(void* buffer);
+
     int (*tty_intr)();
     int (*tty_read)(char* buf, int len);
     int (*tty_write)(char* buf, int len);

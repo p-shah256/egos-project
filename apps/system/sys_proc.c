@@ -32,6 +32,11 @@ int main() {
     grass->sys_recv(&sender, buf, SYSCALL_MSG_LEN);
     INFO("sys_proc receives: %s", buf);
 
+    sys_spawn(SYS_NET_EXEC_START);
+    sender = GPID_NET;
+    grass->sys_recv(&sender, buf, SYSCALL_MSG_LEN);
+    INFO("sys_proc receives: %s", buf);
+
     sys_spawn(SYS_SHELL_EXEC_START);
 
     while (1) {
@@ -78,17 +83,16 @@ static int app_read(int off, char* dst) { file_read(app_ino, off, BLOCK_SIZE, ds
 static int app_spawn(struct proc_request *req) {
     int bin_ino = dir_lookup(0, "bin/");
     if ((app_ino = dir_lookup(bin_ino, req->argv[0])) < 0) return -1;
-
     app_pid = grass->proc_alloc();
     int argc = req->argv[req->argc - 1][0] == '&'? req->argc - 1 : req->argc;
-
+    
     elf_load(app_pid, app_read, argc, (void**)req->argv);
     grass->proc_set_ready(app_pid);
     return 0;
 }
 
 static int sys_proc_base;
-char* sysproc_names[] = {"sys_proc", "sys_file", "sys_dir", "sys_shell"};
+char* sysproc_names[] = {"sys_proc", "sys_file", "sys_dir", "sys_net", "sys_shell"};
 
 static int sys_proc_read(int block_no, char* dst) {
     return earth->disk_read(sys_proc_base + block_no, 1, dst);

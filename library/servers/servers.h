@@ -10,12 +10,15 @@ int dir_rm(int dir_ino, char* name);
 int file_read(int file_ino, int offset, int len, char* block);
 int file_write(int file_ino, int offset, int len, char* block);
 int file_size(int file_ino);
+int net_send(int length, char* packet);
+int net_recv(char *packet);
 
 enum grass_servers {
     GPID_UNUSED,
     GPID_PROCESS,
     GPID_FILE,
     GPID_DIR,
+    GPID_NET,
     GPID_SHELL,
     GPID_USER_START
 };
@@ -77,4 +80,20 @@ struct dir_request {
 struct dir_reply {
     enum dir_status { DIR_OK, DIR_ERROR } status;
     int ino;
+};
+
+/* GPID_NET */
+struct net_request {
+    enum {
+        NET_SEND,
+        NET_RECV
+    } type;
+    int length;
+    char buf[256];
+};
+
+struct net_reply {
+    enum net_status { NET_OK, NET_ERROR } status;
+    int length;
+    char buf[256];
 };

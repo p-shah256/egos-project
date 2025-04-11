@@ -83,3 +83,41 @@ int file_size(int file_ino) {
     if (ret < 0) {return ret;}
     return buf[0]; // this is the file size
 }
+
+int net_send(int length, char* packet) {
+    struct net_request req;
+    req.type = NET_SEND;
+    req.length = length;
+    ASSERT(length < 256, "Cannot send packet more than 256");
+    memcpy(req.buf, packet, length);
+    grass->sys_send(GPID_NET, (void*)&req, sizeof(req));
+
+    sender = GPID_NET;
+    grass->sys_recv(&sender, buf, sizeof(struct net_reply));
+    if (sender != GPID_NET) {
+        FATAL("net send an error occured");
+    }
+    struct net_reply *reply = (void*)buf;
+
+    return reply->status == NET_OK ? 0 : -1;
+}
+
+int net_recv(char *packet) {
+    struct net_request req;
+    req.type = NET_RECV;
+    grass->sys_send(GPID_NET, (void*)&req, sizeof(req));
+
+    sender = GPID_NET;
+    grass->sys_recv(&sender, buf, sizeof(struct net_reply));
+    if (sender != GPID_NET) {
+        FATAL("net recv an error occured");
+    }
+    struct net_reply *reply = (void*)buf;
+
+    if (reply->length > 0 && reply->status == NET_OK) {
+        memcpy(packet, reply->buf, reply->length);
+        return reply->length;
+    }
+
+    return reply->status == NET_OK ? 0 : -1;
+}

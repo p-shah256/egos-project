@@ -21,9 +21,7 @@ void disk_init();
 void intr_init();
 void timer_init();
 void mmu_init();
-void macb_probe();
-void macb_start();
-void macb_test();
+void macb_init();
 
 struct grass *grass = (void*)GRASS_STRUCT_BASE;
 struct earth *earth = (void*)EARTH_STRUCT_BASE;
@@ -46,14 +44,8 @@ static void earth_init() {
     mmu_init();
     SUCCESS("Finished initializing the CPU memory management unit");
 
-    #ifdef NETON
-        macb_probe();
-        SUCCESS("Finished probing MACB");
-        macb_start();
-        SUCCESS("Finished starting MACB device");
-	macb_test();
-	SUCCESS("Finished TEST successfully");
-    #endif
+    macb_init();
+    SUCCESS("Finished initialing the NIC");
 }
 
 static int grass_read(int block_no, char* dst) {
