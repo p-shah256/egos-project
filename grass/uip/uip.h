@@ -52,6 +52,7 @@
 #ifndef __UIP_H__
 #define __UIP_H__
 
+#include "hello-world.h"
 #include "uipopt.h"
 
 /**
@@ -1173,7 +1174,7 @@ struct uip_conn {
                              segment sent. */
 
     /** The application state. */
-    uip_tcp_appstate_t appstate;
+    struct hello_world_state appstate;
 };
 
 /**

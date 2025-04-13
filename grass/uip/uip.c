@@ -155,25 +155,15 @@ static u16_t tmp16;
 #define ICMP_ECHO_REPLY                  0
 #define ICMP_ECHO                        8
 
-#define ICMP6_ECHO_REPLY                 129
-#define ICMP6_ECHO                       128
-#define ICMP6_NEIGHBOR_SOLICITATION      135
-#define ICMP6_NEIGHBOR_ADVERTISEMENT     136
-
-#define ICMP6_FLAG_S                     (1 << 6)
-
-#define ICMP6_OPTION_SOURCE_LINK_ADDRESS 1
-#define ICMP6_OPTION_TARGET_LINK_ADDRESS 2
-
 
 // +---------------------------------------------------------+
 // |                         Macros.                         |
 // +---------------------------------------------------------+
-#define BUF ((struct uip_tcpip_hdr *)&uip_buf[UIP_LLH_LEN])
-#define FBUF ((struct uip_tcpip_hdr *)&uip_reassbuf[0])
+// NOTE: these are pointing to the same uip_buf buffer, but with different offsets
+#define BUF     ((struct uip_tcpip_hdr *)&uip_buf[UIP_LLH_LEN])
+#define FBUF    ((struct uip_tcpip_hdr *)&uip_reassbuf[0])
 #define ICMPBUF ((struct uip_icmpip_hdr *)&uip_buf[UIP_LLH_LEN])
-#define UDPBUF ((struct uip_udpip_hdr *)&uip_buf[UIP_LLH_LEN])
-
+#define UDPBUF  ((struct uip_udpip_hdr *)&uip_buf[UIP_LLH_LEN])
 
 #if UIP_STATISTICS == 1
 struct uip_stats uip_stat;
