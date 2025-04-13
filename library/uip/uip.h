@@ -52,8 +52,8 @@
 #ifndef __UIP_H__
 #define __UIP_H__
 
-#include "hello-world.h"
 #include "uipopt.h"
+#include "psock.h"
 
 /**
  * Repressentation of an IP address.
@@ -1138,6 +1138,19 @@ extern u16_t uip_len;
 #if UIP_URGDATA > 0
 extern u16_t uip_urglen, uip_surglen;
 #endif /* UIP_URGDATA > 0 */
+
+
+/* Next, we define the uip_tcp_appstate_t datatype. This is the state
+   of our application, and the memory required for this state is
+   allocated together with each TCP connection. One application state
+   for each TCP connection. */
+typedef struct hello_world_state {
+  struct psock p;
+  char inputbuffer[10];
+  char name[40];
+} uip_tcp_appstate_t;
+
+
 
 /**
  * Representation of a uIP TCP connection.

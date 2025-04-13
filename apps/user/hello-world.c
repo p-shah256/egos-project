@@ -23,8 +23,7 @@
  * <string.h>, since we use the memcpy() function in the code.
  */
 #include "hello-world.h"
-#include "uip.h"
-#include <stdio.h>
+#include "servers.h"
 #include <string.h>
 // #include "timer.h"
 
@@ -110,7 +109,7 @@ int main(void) {
     /* Main processing loop */
     while (1) {
         /* Check for incoming packets */
-        uip_len = tapdev_read();
+        uip_len = net_recv((char *)uip_buf);
 
         if (uip_len > 0) {
             printf("Received %u bytes\n", uip_len);
@@ -122,7 +121,7 @@ int main(void) {
 
             /* If uIP produced a response, send it */
             if (uip_len > 0) {
-                tapdev_send();
+                net_send(uip_len, (char *)uip_buf);
             }
         }
     }
