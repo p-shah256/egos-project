@@ -217,7 +217,6 @@ void uip_process(u8_t flag) {
         if ((uip_connr->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED &&
             !uip_outstanding(uip_connr)) {
             uip_flags = UIP_POLL;
-            // TODO: commented this here from webserver.h
             UIP_APPCALL();
             goto appsend;
         }
