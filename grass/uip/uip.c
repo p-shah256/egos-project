@@ -193,7 +193,9 @@ void uip_log(char *msg);
 
 
 
-
+// +---------------------------------------------------------+
+// |                        UIP INIT                         |
+// +---------------------------------------------------------+
 void uip_init(void) {
     for (c = 0; c < UIP_LISTENPORTS; ++c) {
         uip_listenports[c] = 0;
@@ -1158,6 +1160,9 @@ drop:
 
 }
 
+// +---------------------------------------------------------+
+// |                        UNLISTEN                         |
+// +---------------------------------------------------------+
 void uip_unlisten(u16_t port) {
     for (c = 0; c < UIP_LISTENPORTS; ++c) {
         if (uip_listenports[c] == port) {
@@ -1167,6 +1172,9 @@ void uip_unlisten(u16_t port) {
     }
 }
 
+// +---------------------------------------------------------+
+// |                         LISTEN                          |
+// +---------------------------------------------------------+
 void uip_listen(u16_t port) {
     for (c = 0; c < UIP_LISTENPORTS; ++c) {
         if (uip_listenports[c] == 0) {
@@ -1175,3 +1183,5 @@ void uip_listen(u16_t port) {
         }
     }
 }
+
+// TODO: understand what is this APP FUCKING CALL

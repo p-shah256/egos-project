@@ -2,3 +2,4 @@ CompileFlags:
   Add:
     - "-Iapps"
     - "-Iapps/user"
+    - "-Igrass/include"

@@ -1138,7 +1138,6 @@ extern u16_t uip_len;
 extern u16_t uip_urglen, uip_surglen;
 #endif /* UIP_URGDATA > 0 */
 
-
 /**
  * Representation of a uIP TCP connection.
  *
@@ -1150,35 +1149,32 @@ extern u16_t uip_urglen, uip_surglen;
  * configured in the "uipopt.h" header file.
  */
 struct uip_conn {
-  uip_ipaddr_t ripaddr;   /**< The IP address of the remote host. */
-  
-  u16_t lport;        /**< The local TCP port, in network byte order. */
-  u16_t rport;        /**< The local remote TCP port, in network byte
-			 order. */
-  
-  u8_t rcv_nxt[4];    /**< The sequence number that we expect to
-			 receive next. */
-  u8_t snd_nxt[4];    /**< The sequence number that was last sent by
-                         us. */
-  u16_t len;          /**< Length of the data that was previously sent. */
-  u16_t mss;          /**< Current maximum segment size for the
-			 connection. */
-  u16_t initialmss;   /**< Initial maximum segment size for the
-			 connection. */
-  u8_t sa;            /**< Retransmission time-out calculation state
-			 variable. */
-  u8_t sv;            /**< Retransmission time-out calculation state
-			 variable. */
-  u8_t rto;           /**< Retransmission time-out. */
-  u8_t tcpstateflags; /**< TCP state and flags. */
-  u8_t timer;         /**< The retransmission timer. */
-  u8_t nrtx;          /**< The number of retransmissions for the last
-			 segment sent. */
+    uip_ipaddr_t ripaddr; /**< The IP address of the remote host. */
+    u16_t lport;          /**< The local TCP port, in network byte order. */
+    u16_t rport;          /**< The local remote TCP port, in network byte
+                             order. */
+    u8_t rcv_nxt[4];      /**< The sequence number that we expect to
+                             receive next. */
+    u8_t snd_nxt[4];      /**< The sequence number that was last sent by
+                             us. */
+    u16_t len;            /**< Length of the data that was previously sent. */
+    u16_t mss;            /**< Current maximum segment size for the
+                             connection. */
+    u16_t initialmss;     /**< Initial maximum segment size for the
+                             connection. */
+    u8_t sa;              /**< Retransmission time-out calculation state
+                             variable. */
+    u8_t sv;              /**< Retransmission time-out calculation state
+                             variable. */
+    u8_t rto;             /**< Retransmission time-out. */
+    u8_t tcpstateflags;   /**< TCP state and flags. */
+    u8_t timer;           /**< The retransmission timer. */
+    u8_t nrtx;            /**< The number of retransmissions for the last
+                             segment sent. */
 
-  /** The application state. */
-  // uip_tcp_appstate_t appstate;
+    /** The application state. */
+    // uip_tcp_appstate_t appstate;
 };
-
 
 /**
  * Pointer to the current TCP connection.
