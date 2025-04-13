@@ -536,4 +536,19 @@ typedef struct httpd_state uip_tcp_appstate_t
 /** @} */
 /** @} */
 
+/* Socket state structure */
+struct socket_state {
+  uint8_t state;
+  uint16_t port;
+  uint8_t buffer[UIP_BUFSIZE];
+  uint16_t buffer_len;
+};
+
+/* Define the application state type */
+typedef struct socket_state uip_tcp_appstate_t;
+
+/* Define the application callback */
+#define UIP_APPCALL socket_appcall
+
+
 #endif /* __UIPOPT_H__ */

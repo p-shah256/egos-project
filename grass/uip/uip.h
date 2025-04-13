@@ -1173,7 +1173,7 @@ struct uip_conn {
                              segment sent. */
 
     /** The application state. */
-    // uip_tcp_appstate_t appstate;
+    uip_tcp_appstate_t appstate;
 };
 
 /**
