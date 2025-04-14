@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdlib.h>
 #include "egos.h"
 #include "macb.h"
@@ -262,7 +263,7 @@ void macb_start() {
 		else
 			macb.tx_ring[i].ctrl = MACB_BIT(TX_USED);
 	}
-	flush_dcache_range(macb.rx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
+	flush_dcache_range(macb.tx_ring_dma[0], MACB_TX_DMA_DESC_SIZE);
 
 	macb.rx_tail = 0;
 	macb.tx_head = 0;
@@ -320,7 +321,7 @@ void macb_send(int length, void *packet) {
 	macb.tx_ring[tx_head].addr = (m_uint32)packet;
 
 	barrier();
-	flush_dcache_range(macb.tx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
+	flush_dcache_range(macb.tx_ring_dma[0], MACB_TX_DMA_DESC_SIZE);
 	macb_writel(macb, NCR, MACB_BIT(TE) | MACB_BIT(RE) | MACB_BIT(TSTART));
 
 	// INFO("Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
@@ -417,6 +418,7 @@ int _macb_recv(void *packetp) {
 
 		status = macb.rx_ring[next_rx_tail].ctrl;
 		if (status & MACB_BIT(RX_SOF)) {
+			printf("MACB: Receiving packet, Contents: \n");
 			if (next_rx_tail != macb.rx_tail)
 				reclaim_rx_buffers(next_rx_tail);
 			macb.wrapped = 0;
@@ -506,10 +508,26 @@ int macb_recv(void* buffer) {
 	return -1;
 }
 
+int _macb_write_hwaddr()
+{
+	m_uint32 hwaddr_bottom;
+	m_uint16 hwaddr_top;
+	unsigned char enetaddr[6] = {0x52,0x54,0x00,0x00,0x00,0x01};
+
+	/* set hardware address */
+	hwaddr_bottom = enetaddr[0] | enetaddr[1] << 8 |
+			enetaddr[2] << 16 | enetaddr[3] << 24;
+	macb_writel(macb, SA1B, hwaddr_bottom);
+	hwaddr_top = enetaddr[4] | enetaddr[5] << 8;
+	macb_writel(macb, SA1T, hwaddr_top);
+	return 0;
+}
+
 void macb_init() {
 
 #ifdef NETON
 	macb_probe();
+	_macb_write_hwaddr();
 	macb_start();
 	//	macb_test();
 	//	SUCCESS("Finished TEST successfully");
@@ -519,3 +537,5 @@ void macb_init() {
 	earth->net_recv = macb_recv;
 
 }
+
+

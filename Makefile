@@ -33,8 +33,8 @@ CFLAGS = -march=rv32i -mabi=ilp32 -mcmodel=medlow -ffunction-sections -fdata-sec
 LDFLAGS = -Wl,--gc-sections -nostartfiles -nostdlib
 INCLUDE = -Ilibrary -Ilibrary/elf -Ilibrary/libc -Ilibrary/file -Ilibrary/servers
 # QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-e31.cfg -kernel $(QEMU)/qemu.elf -nographic
-#QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic
-QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic -nic bridge,helper=/usr/lib/qemu/qemu-bridge-helper
+# QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic
+QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic -nic bridge,helper=/usr/lib/qemu/qemu-bridge-helper,mac=52:54:00:00:00:01
 VERBOSE_LINKER = -Xlinker --verbose
 
 COMMON = $(CFLAGS) $(LDFLAGS) $(INCLUDE) -D$(CPU_TYPE) -D CPU_CLOCK_RATE=65000000 -D$(SCHEDULER) -D$(SYSCALLFUNC) -D$(IFVM) -D$(DISK) -D$(RWFS) -D$(NET)
