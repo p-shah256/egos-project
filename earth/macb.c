@@ -298,6 +298,11 @@ void delay(int itrs) {
 }
 
 void macb_send(int length, void *packet) {
+	printf("Sending packet of length %d\n", length);
+	printf("Contents: ");
+	for (int i = 0; i < length; i++) {
+		printf("%02x ", ((unsigned char *)packet)[i]);
+	}
 	unsigned long ctrl;
 	unsigned int tx_head = macb.tx_head;
 	int i;
@@ -318,19 +323,19 @@ void macb_send(int length, void *packet) {
 	flush_dcache_range(macb.tx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
 	macb_writel(macb, NCR, MACB_BIT(TE) | MACB_BIT(RE) | MACB_BIT(TSTART));
 
-	INFO("Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
+	// INFO("Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
 	/*
     * I guess this is necessary because the networking core may
     * re-use the transmit buffer as soon as we return...
     */
 	for (i = 0; i <= MACB_TX_TIMEOUT; i++) {
 		barrier();
-		INFO("Testing %d", i);
+		// INFO("Testing %d", i);
 		// invalidate_cache(macb.tx_ring_dma[0], MACB_TX_DMA_DESC_SIZE);
 		ctrl = macb.tx_ring[tx_head].ctrl;
-		INFO("Test Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
+		// INFO("Test Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
 		if (ctrl & MACB_BIT(TX_USED))
-			INFO("Used %d", i);
+			// INFO("Used %d", i);
 		break;
 		delay(BUSY_LOOP);
 	}

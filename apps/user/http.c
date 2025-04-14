@@ -28,6 +28,8 @@
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
+void print_content(int uip_len);
+
 int main(void) {
     int i;
     uip_ipaddr_t ipaddr;
@@ -55,18 +57,9 @@ int main(void) {
         uip_len = net_recv((char *)uip_buf);
         if (uip_len > 0) {
 
-            printf("net_recved\n");
-
             if (BUF->type == htons(UIP_ETHTYPE_IP)) {
-                printf("IP packet received\n");
-                printf("Contents:\n");
-                {
-                    int i;
-                    for (i = 0; i < 20; i++) {
-                        printf("%x ", uip_buf[i]);
-                    }
-                    printf("\n");
-                }
+                CRITICAL("IP packet received");
+                print_content(uip_len);
 
                 uip_arp_ipin();
                 uip_input();
@@ -74,49 +67,40 @@ int main(void) {
                    should be sent out on the network, the global variable
                    uip_len is set to a value > 0. */
                 if (uip_len > 0) {
-                    printf("Sending IP packet\n");
-                    printf("Contents:\n");
-                    {
-                        int i;
-                        for (i = 0; i < 20; i++) {
-                            printf("%x ", uip_buf[i]);
-                        }
-                        printf("\n");
-                    }
+                    CRITICAL("Sending IP packet");
+                    print_content(uip_len);
+
                     uip_arp_out();
                     net_send(uip_len, (char *)uip_buf);
                 }
             } else if (BUF->type == htons(UIP_ETHTYPE_ARP)) {
-                printf("ARP recieved\n");
+                CRITICAL("ARP recieved");
+                print_content(uip_len);
+
                 uip_arp_arpin();
                 /* If the above function invocation resulted in data that
                    should be sent out on the network, the global variable
                    uip_len is set to a value > 0. */
                 if (uip_len > 0) {
-                    printf("sending ARP reply\n");
-                    printf("contents:\n");
-                    {
-                        int i;
-                        for (i = 0; i < 20; i++) {
-                            printf("%x ", uip_buf[i]);
-                        }
-                        printf("\n");
-                    }
+                    CRITICAL("sending ARP reply");
+                    print_content(uip_len);
+
                     net_send(uip_len, (char *)uip_buf);
                 }
             } else {
                 printf("Unknown packet type: %x\n", BUF->type);
-                printf("Contents:\n");
-                {
-                    int i;
-                    for (i = 0; i < 20; i++) {
-                        printf("%x ", uip_buf[i]);
-                    }
-                    printf("\n");
-                }
-                printf("Number of bytes: %d\n", uip_len);
+                print_content(uip_len);
             }
         }
     }
     return 0;
+}
+
+void print_content(int uip_len) {
+    int i;
+    for (i = 0; i < uip_len; i++) {
+        printf("%x ", uip_buf[i]);
+    }
+    printf("\n");
+    INFO("Total length: %d\n", uip_len);
 }

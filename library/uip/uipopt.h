@@ -149,7 +149,7 @@ typedef struct httpd_state uip_tcp_appstate_t;
 #ifdef UIP_CONF_PINGADDRCONF
 #define UIP_PINGADDRCONF UIP_CONF_PINGADDRCONF
 #else /* UIP_CONF_PINGADDRCONF */
-#define UIP_PINGADDRCONF 0
+#define UIP_PINGADDRCONF 1
 #endif /* UIP_CONF_PINGADDRCONF */
 
 

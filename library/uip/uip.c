@@ -93,7 +93,7 @@ uip_ipaddr_t uip_hostaddr, uip_draddr, uip_netmask;
 
 static const uip_ipaddr_t all_ones_addr = {0xffff, 0xffff};
 static const uip_ipaddr_t all_zeroes_addr = {0x0000, 0x0000};
-struct uip_eth_addr uip_ethaddr = {{0, 0, 0, 0, 0, 0}};
+struct uip_eth_addr uip_ethaddr = {{0x52, 0x54, 0, 0, 0, 0x01}};
 
 #ifndef UIP_CONF_EXTERNAL_BUFFER
 u8_t uip_buf[UIP_BUFSIZE + 2]; /* The packet buffer that contains
@@ -724,7 +724,7 @@ void uip_process(u8_t flag) {
         /* If we are configured to use ping IP address configuration and
            hasn't been assigned an IP address yet, we accept all ICMP
            packets. */
-#if UIP_PINGADDRCONF
+#if UIP_PINGADDRCONF && !UIP_CONF_IPV6
         if (BUF->proto == UIP_PROTO_ICMP) {
             UIP_LOG("ip: possible ping config packet received.");
             goto icmp_input;
