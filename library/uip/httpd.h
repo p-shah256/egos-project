@@ -38,7 +38,6 @@
 // #include "httpd-fs.h"
 #include "psock.h"
 
-#ifdef UIP_APP_HTTPD
 struct httpd_state {
     unsigned char timer;
     struct psock sin, sout;
@@ -60,7 +59,12 @@ void httpd_appcall(void);
 // void httpd_log(char *msg);
 // void httpd_log_file(u16_t *requester, char *file);
 
-#endif /* UIP_APP_HTTPD */
+typedef struct httpd_state uip_tcp_appstate_t;
+/* UIP_APPCALL: the name of the application function. This function
+   must return void and take no arguments (i.e., C type "void
+   appfunc(void)"). */
+#ifndef UIP_APPCALL
+#define UIP_APPCALL httpd_appcall
+#endif
 
 #endif /* __HTTPD_H__ */
-

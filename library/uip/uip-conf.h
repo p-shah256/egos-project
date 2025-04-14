@@ -56,7 +56,7 @@
 #define __UIP_CONF_H__
 
 // #include <inttypes.h>
-#include "egos.h"
+#include "../egos.h"
 
 /**
  * 8 bit datatype
@@ -119,7 +119,7 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#define UIP_CONF_LOGGING         1
+#define UIP_CONF_LOGGING         0
 
 /**
  * UDP support on or off

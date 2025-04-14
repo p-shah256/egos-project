@@ -39,7 +39,7 @@ static int handle_connection(struct hello_world_state *s);
  * called.
  */
 void hello_world_init(void) {
-    uip_log("hello_world_init, listening on port 1000");
+    UIP_LOG("hello_world_init, listening on port 1000");
     /* We start to listen for connections on TCP port 1000. */
     uip_listen(HTONS(1000));
 }
@@ -57,7 +57,7 @@ void hello_world_appcall(void) {
      * the application state of the connection. We make a pointer to
      * this to access it easier.
      */
-    uip_log("hello_world_appcall");
+    UIP_LOG("hello_world_appcall");
     struct hello_world_state *s = &(uip_conn->appstate);
 
     /*
