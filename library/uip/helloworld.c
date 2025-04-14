@@ -26,6 +26,7 @@
 #include "uip.h"
 #include <string.h>
 
+#ifdef UIP_APP_HELLOWORLD
 /*
  * Declaration of the protosocket function that handles the connection
  * (defined at the end of the code).
@@ -94,3 +95,4 @@ static int handle_connection(struct hello_world_state *s) {
     PSOCK_END(&s->p);
 }
 /*---------------------------------------------------------------------------*/
+#endif /* UIP_APP_HELLOWORLD */

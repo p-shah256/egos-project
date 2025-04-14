@@ -69,6 +69,44 @@
 
 #include "uip-conf.h"
 
+// +---------------------------------------------------------+
+// |                      APP SELECTION                      |
+// +---------------------------------------------------------+
+/*
+ * Application selection
+ * Define exactly ONE of these to choose which app to compile
+ */
+// #define UIP_APP_HELLOWORLD
+#define UIP_APP_HTTPD
+
+/*
+ * App-specific includes and defines based on selection
+ */
+/* UIP_APPCALL: the name of the application function. This function
+   must return void and take no arguments (i.e., C type "void
+   appfunc(void)"). */
+#ifdef UIP_APP_HELLOWORLD
+#define UIP_APPCALL hello_world_appcall
+typedef struct hello_world_state uip_tcp_appstate_t;
+#endif
+
+#ifdef UIP_APP_HTTPD
+#define UIP_APPCALL httpd_appcall
+typedef struct httpd_state uip_tcp_appstate_t;
+#endif
+
+/* Make sure only one app is selected */
+#if defined(UIP_APP_HELLOWORLD) && defined(UIP_APP_HTTPD)
+#error "Only one application can be selected at a time!"
+#endif
+
+#if !defined(UIP_APP_HELLOWORLD) && !defined(UIP_APP_HTTPD)
+#error "You must select at least one application!"
+#endif
+
+
+
+
 /*------------------------------------------------------------------------------*/
 
 /**

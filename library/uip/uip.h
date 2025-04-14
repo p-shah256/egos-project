@@ -52,9 +52,10 @@
 #ifndef __UIP_H__
 #define __UIP_H__
 
+#include "uip/httpd.h"
 #include "uipopt.h"
 #include "psock.h"
-#include "helloworld.h"
+// #include "helloworld.h"
 
 /**
  * Repressentation of an IP address.
@@ -1175,7 +1176,7 @@ struct uip_conn {
                              segment sent. */
 
     /** The application state. */
-    struct hello_world_state appstate;
+    uip_tcp_appstate_t appstate;
 };
 
 /**

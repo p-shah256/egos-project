@@ -41,7 +41,7 @@ char* kernel_processes[] = {
 #8: /bin/cat       #9: /bin/ls              #10:/bin/cd         #11:/bin/pwd
 #12:/bin/clock     #13:/bin/crash1          #14:/bin/crash2     #15:/bin/ult
 #16:/bin/memloop   #17:/bin/helloworld      #18:/bin/loop       #19:/bin/crash3
-#20:/bin/append    #21:/bin/fstest          #22:/bin/net_sender #23:/bin/net_receiver #23:/home/cs6640/fs #24:/bin/tcptest (ino=100)
+#20:/bin/append    #21:/bin/fstest          #22:/bin/net_sender #23:/bin/net_receiver #23:/home/cs6640/fs #24:/bin/http (ino=100)
 */
 #define NINODE 25
 char* contents[] = {
@@ -51,7 +51,7 @@ char* contents[] = {
                     "./   3 ../   1 ",
                     "./   4 ../   1 ",
                     "Welcome to CS6640 labs. \nThis OS is tailored from egos-2000 (https://github.com/yhzhang0128/egos-2000).\n",
-                    "./   6 ../   0 echo   7 cat   8 ls   9 cd  10 pwd  11 clock  12 crash1  13 crash2  14 ult  15 memloop 16 helloworld 17 loop 18 crash3 19 append 20 fstest 21 net_sender 22 net_receiver 23 tcptest 24",
+                    "./   6 ../   0 echo   7 cat   8 ls   9 cd  10 pwd  11 clock  12 crash1  13 crash2  14 ult  15 memloop 16 helloworld 17 loop 18 crash3 19 append 20 fstest 21 net_sender 22 net_receiver 23 http 24",
                     "#../build/release/echo.elf",
                     "#../build/release/cat.elf",
                     "#../build/release/ls.elf",
@@ -69,7 +69,7 @@ char* contents[] = {
                     "#../build/release/fstest.elf",
                     "#../build/release/net_sender.elf",
                     "#../build/release/net_receiver.elf",
-                    "#../build/release/tcptest.elf",
+                    "#../build/release/http.elf",
                     "./   100 ../ 2 ", // dummy, entry to rwfs
 };
 
