@@ -31,10 +31,10 @@
 int main(void) {
     int i;
     uip_ipaddr_t ipaddr;
-    struct timer periodic_timer, arp_timer;
+    // struct timer periodic_timer, arp_timer;
 
-    timer_set(&periodic_timer, CLOCK_SECOND / 2);
-    timer_set(&arp_timer, CLOCK_SECOND * 10);
+    // timer_set(&periodic_timer, CLOCK_SECOND / 2);
+    // timer_set(&arp_timer, CLOCK_SECOND * 10);
 
     uip_init();
 
@@ -54,6 +54,9 @@ int main(void) {
     while (1) {
         uip_len = net_recv((char *)uip_buf);
         if (uip_len > 0) {
+
+            printf("net_recved\n");
+
             if (BUF->type == htons(UIP_ETHTYPE_IP)) {
                 printf("IP packet received\n");
                 printf("Contents:\n");
@@ -71,36 +74,47 @@ int main(void) {
                    should be sent out on the network, the global variable
                    uip_len is set to a value > 0. */
                 if (uip_len > 0) {
+                    printf("Sending IP packet\n");
+                    printf("Contents:\n");
+                    {
+                        int i;
+                        for (i = 0; i < 20; i++) {
+                            printf("%x ", uip_buf[i]);
+                        }
+                        printf("\n");
+                    }
                     uip_arp_out();
                     net_send(uip_len, (char *)uip_buf);
                 }
             } else if (BUF->type == htons(UIP_ETHTYPE_ARP)) {
+                printf("ARP recieved\n");
                 uip_arp_arpin();
                 /* If the above function invocation resulted in data that
                    should be sent out on the network, the global variable
                    uip_len is set to a value > 0. */
                 if (uip_len > 0) {
+                    printf("sending ARP reply\n");
+                    printf("contents:\n");
+                    {
+                        int i;
+                        for (i = 0; i < 20; i++) {
+                            printf("%x ", uip_buf[i]);
+                        }
+                        printf("\n");
+                    }
                     net_send(uip_len, (char *)uip_buf);
                 }
-            }
-
-        } else if (timer_expired(&periodic_timer)) {
-            timer_reset(&periodic_timer);
-            for (i = 0; i < UIP_CONNS; i++) {
-                uip_periodic(i);
-                /* If the above function invocation resulted in data that
-                   should be sent out on the network, the global variable
-                   uip_len is set to a value > 0. */
-                if (uip_len > 0) {
-                    uip_arp_out();
-                    net_send(uip_len, (char *)uip_buf);
+            } else {
+                printf("Unknown packet type: %x\n", BUF->type);
+                printf("Contents:\n");
+                {
+                    int i;
+                    for (i = 0; i < 20; i++) {
+                        printf("%x ", uip_buf[i]);
+                    }
+                    printf("\n");
                 }
-            }
-
-            /* Call the ARP timer function every 10 seconds. */
-            if (timer_expired(&arp_timer)) {
-                timer_reset(&arp_timer);
-                uip_arp_timer();
+                printf("Number of bytes: %d\n", uip_len);
             }
         }
     }
