@@ -23,6 +23,7 @@
  * <string.h>, since we use the memcpy() function in the code.
  */
 #include "app.h"
+#include "servers.h"
 #include <string.h>
 // #include "timer.h"
 
@@ -36,6 +37,7 @@ int main(void) {
 
     /* Initialize our application */
     hello_world_init();
+    uip_log("uIP started");
 
     /* Main processing loop */
     while (1) {
@@ -47,11 +49,14 @@ int main(void) {
             for (i = 0; i < uip_len; ++i) {
                 printf("%02x ", ((unsigned char *)uip_buf)[i]);
             }
-            /* Process incoming packet */
-            uip_input();
 
-            /* If uIP produced a response, send it */
+            uip_arp_ipin();
+            uip_input();
+            /* If the above function invocation resulted in data that
+               should be sent out on the network, the global variable
+               uip_len is set to a value > 0. */
             if (uip_len > 0) {
+                uip_arp_out();
                 net_send(uip_len, (char *)uip_buf);
             }
         }

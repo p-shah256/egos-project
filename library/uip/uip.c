@@ -1,3 +1,4 @@
+#include <string.h>
 #define DEBUG_PRINTF(...) /*printf(__VA_ARGS__)*/
 
 /**
@@ -77,22 +78,22 @@
  * first available byte. The TCP/IP stack will calculate the
  * checksums, and fill in the necessary header fields and finally send
  * the packet back to the peer.
-*/
+ */
 
+#include "uip-arch.h"
 #include "uip.h"
 #include "uipopt.h"
-#include "uip-arch.h"
 
-#include <string.h>
+// #include <string.h>
 
 // +---------------------------------------------------------+
 // |                 Variable declarations.                  |
 // +---------------------------------------------------------+
 uip_ipaddr_t uip_hostaddr, uip_draddr, uip_netmask;
 
-static const uip_ipaddr_t all_ones_addr = {0xffff,0xffff};
-static const uip_ipaddr_t all_zeroes_addr = {0x0000,0x0000};
-struct uip_eth_addr uip_ethaddr = {{0,0,0,0,0,0}};
+static const uip_ipaddr_t all_ones_addr = {0xffff, 0xffff};
+static const uip_ipaddr_t all_zeroes_addr = {0x0000, 0x0000};
+struct uip_eth_addr uip_ethaddr = {{0, 0, 0, 0, 0, 0}};
 
 #ifndef UIP_CONF_EXTERNAL_BUFFER
 u8_t uip_buf[UIP_BUFSIZE + 2]; /* The packet buffer that contains
@@ -138,23 +139,22 @@ static u16_t tmp16;
 // +---------------------------------------------------------+
 // |               Structures and definitions.               |
 // +---------------------------------------------------------+
-#define TCP_FIN                          0x01
-#define TCP_SYN                          0x02
-#define TCP_RST                          0x04
-#define TCP_PSH                          0x08
-#define TCP_ACK                          0x10
-#define TCP_URG                          0x20
-#define TCP_CTL                          0x3f
+#define TCP_FIN         0x01
+#define TCP_SYN         0x02
+#define TCP_RST         0x04
+#define TCP_PSH         0x08
+#define TCP_ACK         0x10
+#define TCP_URG         0x20
+#define TCP_CTL         0x3f
 
-#define TCP_OPT_END                      0 /* End of TCP options list */
-#define TCP_OPT_NOOP                     1 /* "No-operation" TCP option */
-#define TCP_OPT_MSS                      2 /* Maximum segment size TCP option */
+#define TCP_OPT_END     0 /* End of TCP options list */
+#define TCP_OPT_NOOP    1 /* "No-operation" TCP option */
+#define TCP_OPT_MSS     2 /* Maximum segment size TCP option */
 
-#define TCP_OPT_MSS_LEN                  4 /* Length of TCP MSS option. */
+#define TCP_OPT_MSS_LEN 4 /* Length of TCP MSS option. */
 
-#define ICMP_ECHO_REPLY                  0
-#define ICMP_ECHO                        8
-
+#define ICMP_ECHO_REPLY 0
+#define ICMP_ECHO       8
 
 // +---------------------------------------------------------+
 // |                         Macros.                         |
@@ -173,19 +173,120 @@ struct uip_stats uip_stat;
 #endif /* UIP_STATISTICS == 1 */
 
 #if UIP_LOGGING == 1
-#include <stdio.h>
+// #include <stdio.h>
 void uip_log(char *msg);
 #define UIP_LOG(m) uip_log(m)
 #else
 #define UIP_LOG(m)
 #endif /* UIP_LOGGING == 1 */
 
-
-
-
 // +---------------------------------------------------------+
 // |                        UIP INIT                         |
 // +---------------------------------------------------------+
+#if !UIP_ARCH_ADD32
+void uip_add32(u8_t *op32, u16_t op16) {
+    uip_acc32[3] = op32[3] + (op16 & 0xff);
+    uip_acc32[2] = op32[2] + (op16 >> 8);
+    uip_acc32[1] = op32[1];
+    uip_acc32[0] = op32[0];
+
+    if (uip_acc32[2] < (op16 >> 8)) {
+        ++uip_acc32[1];
+        if (uip_acc32[1] == 0) {
+            ++uip_acc32[0];
+        }
+    }
+
+    if (uip_acc32[3] < (op16 & 0xff)) {
+        ++uip_acc32[2];
+        if (uip_acc32[2] == 0) {
+            ++uip_acc32[1];
+            if (uip_acc32[1] == 0) {
+                ++uip_acc32[0];
+            }
+        }
+    }
+}
+
+#endif /* UIP_ARCH_ADD32 */
+
+#if !UIP_ARCH_CHKSUM
+/*---------------------------------------------------------------------------*/
+static u16_t chksum(u16_t sum, const u8_t *data, u16_t len) {
+    u16_t t;
+    const u8_t *dataptr;
+    const u8_t *last_byte;
+
+    dataptr = data;
+    last_byte = data + len - 1;
+
+    while (dataptr < last_byte) { /* At least two more bytes */
+        t = (dataptr[0] << 8) + dataptr[1];
+        sum += t;
+        if (sum < t) {
+            sum++; /* carry */
+        }
+        dataptr += 2;
+    }
+
+    if (dataptr == last_byte) {
+        t = (dataptr[0] << 8) + 0;
+        sum += t;
+        if (sum < t) {
+            sum++; /* carry */
+        }
+    }
+
+    /* Return sum in host byte order. */
+    return sum;
+}
+/*---------------------------------------------------------------------------*/
+u16_t uip_chksum(u16_t *data, u16_t len) { return htons(chksum(0, (u8_t *)data, len)); }
+/*---------------------------------------------------------------------------*/
+#ifndef UIP_ARCH_IPCHKSUM
+u16_t uip_ipchksum(void) {
+    u16_t sum;
+
+    sum = chksum(0, &uip_buf[UIP_LLH_LEN], UIP_IPH_LEN);
+    DEBUG_PRINTF("uip_ipchksum: sum 0x%04x\n", sum);
+    return (sum == 0) ? 0xffff : htons(sum);
+}
+#endif
+/*---------------------------------------------------------------------------*/
+static u16_t upper_layer_chksum(u8_t proto) {
+    u16_t upper_layer_len;
+    u16_t sum;
+
+#if UIP_CONF_IPV6
+    upper_layer_len = (((u16_t)(BUF->len[0]) << 8) + BUF->len[1]);
+#else  /* UIP_CONF_IPV6 */
+    upper_layer_len = (((u16_t)(BUF->len[0]) << 8) + BUF->len[1]) - UIP_IPH_LEN;
+#endif /* UIP_CONF_IPV6 */
+
+    /* First sum pseudoheader. */
+
+    /* IP protocol and length fields. This addition cannot carry. */
+    sum = upper_layer_len + proto;
+    /* Sum IP source and destination addresses. */
+    sum = chksum(sum, (u8_t *)&BUF->srcipaddr[0], 2 * sizeof(uip_ipaddr_t));
+
+    /* Sum TCP header and data. */
+    sum = chksum(sum, &uip_buf[UIP_IPH_LEN + UIP_LLH_LEN], upper_layer_len);
+
+    return (sum == 0) ? 0xffff : htons(sum);
+}
+/*---------------------------------------------------------------------------*/
+#if UIP_CONF_IPV6
+u16_t uip_icmp6chksum(void) { return upper_layer_chksum(UIP_PROTO_ICMP6); }
+#endif /* UIP_CONF_IPV6 */
+/*---------------------------------------------------------------------------*/
+u16_t uip_tcpchksum(void) { return upper_layer_chksum(UIP_PROTO_TCP); }
+/*---------------------------------------------------------------------------*/
+#if UIP_UDP_CHECKSUMS
+u16_t uip_udpchksum(void) { return upper_layer_chksum(UIP_PROTO_UDP); }
+#endif /* UIP_UDP_CHECKSUMS */
+#endif /* UIP_ARCH_CHKSUM */
+
 void uip_init(void) {
     for (c = 0; c < UIP_LISTENPORTS; ++c) {
         uip_listenports[c] = 0;
@@ -196,8 +297,258 @@ void uip_init(void) {
 #if UIP_ACTIVE_OPEN
     lastport = 1024;
 #endif /* UIP_ACTIVE_OPEN */
+
+    /* IPv4 initialization. */
+#if UIP_FIXEDADDR == 0
+    /*  uip_hostaddr[0] = uip_hostaddr[1] = 0;*/
+#endif /* UIP_FIXEDADDR */
 }
 
+/*---------------------------------------------------------------------------*/
+#if UIP_ACTIVE_OPEN
+struct uip_conn *uip_connect(uip_ipaddr_t *ripaddr, u16_t rport) {
+    register struct uip_conn *conn, *cconn;
+
+    /* Find an unused local port. */
+again:
+    ++lastport;
+
+    if (lastport >= 32000) {
+        lastport = 4096;
+    }
+
+    /* Check if this port is already in use, and if so try to find
+       another one. */
+    for (c = 0; c < UIP_CONNS; ++c) {
+        conn = &uip_conns[c];
+        if (conn->tcpstateflags != UIP_CLOSED && conn->lport == htons(lastport)) {
+            goto again;
+        }
+    }
+
+    conn = 0;
+    for (c = 0; c < UIP_CONNS; ++c) {
+        cconn = &uip_conns[c];
+        if (cconn->tcpstateflags == UIP_CLOSED) {
+            conn = cconn;
+            break;
+        }
+        if (cconn->tcpstateflags == UIP_TIME_WAIT) {
+            if (conn == 0 || cconn->timer > conn->timer) {
+                conn = cconn;
+            }
+        }
+    }
+
+    if (conn == 0) {
+        return 0;
+    }
+
+    conn->tcpstateflags = UIP_SYN_SENT;
+
+    conn->snd_nxt[0] = iss[0];
+    conn->snd_nxt[1] = iss[1];
+    conn->snd_nxt[2] = iss[2];
+    conn->snd_nxt[3] = iss[3];
+
+    conn->initialmss = conn->mss = UIP_TCP_MSS;
+
+    conn->len = 1; /* TCP length of the SYN is one. */
+    conn->nrtx = 0;
+    conn->timer = 1; /* Send the SYN next time around. */
+    conn->rto = UIP_RTO;
+    conn->sa = 0;
+    conn->sv = 16; /* Initial value of the RTT variance. */
+    conn->lport = htons(lastport);
+    conn->rport = rport;
+    uip_ipaddr_copy(&conn->ripaddr, ripaddr);
+
+    return conn;
+}
+#endif /* UIP_ACTIVE_OPEN */
+/*---------------------------------------------------------------------------*/
+#if UIP_UDP
+struct uip_udp_conn *uip_udp_new(uip_ipaddr_t *ripaddr, u16_t rport) {
+    register struct uip_udp_conn *conn;
+
+    /* Find an unused local port. */
+again:
+    ++lastport;
+
+    if (lastport >= 32000) {
+        lastport = 4096;
+    }
+
+    for (c = 0; c < UIP_UDP_CONNS; ++c) {
+        if (uip_udp_conns[c].lport == htons(lastport)) {
+            goto again;
+        }
+    }
+
+    conn = 0;
+    for (c = 0; c < UIP_UDP_CONNS; ++c) {
+        if (uip_udp_conns[c].lport == 0) {
+            conn = &uip_udp_conns[c];
+            break;
+        }
+    }
+
+    if (conn == 0) {
+        return 0;
+    }
+
+    conn->lport = HTONS(lastport);
+    conn->rport = rport;
+    if (ripaddr == NULL) {
+        memset(conn->ripaddr, 0, sizeof(uip_ipaddr_t));
+    } else {
+        uip_ipaddr_copy(&conn->ripaddr, ripaddr);
+    }
+    conn->ttl = UIP_TTL;
+
+    return conn;
+}
+#endif /* UIP_UDP */
+/*---------------------------------------------------------------------------*/
+void uip_unlisten(u16_t port) {
+    for (c = 0; c < UIP_LISTENPORTS; ++c) {
+        if (uip_listenports[c] == port) {
+            uip_listenports[c] = 0;
+            return;
+        }
+    }
+}
+/*---------------------------------------------------------------------------*/
+void uip_listen(u16_t port) {
+    for (c = 0; c < UIP_LISTENPORTS; ++c) {
+        if (uip_listenports[c] == 0) {
+            uip_listenports[c] = port;
+            return;
+        }
+    }
+}
+/*---------------------------------------------------------------------------*/
+/* XXX: IP fragment reassembly: not well-tested. */
+
+#if UIP_REASSEMBLY && !UIP_CONF_IPV6
+#define UIP_REASS_BUFSIZE (UIP_BUFSIZE - UIP_LLH_LEN)
+static u8_t uip_reassbuf[UIP_REASS_BUFSIZE];
+static u8_t uip_reassbitmap[UIP_REASS_BUFSIZE / (8 * 8)];
+static const u8_t bitmap_bits[8] = {0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+static u16_t uip_reasslen;
+static u8_t uip_reassflags;
+#define UIP_REASS_FLAG_LASTFRAG 0x01
+static u8_t uip_reasstmr;
+
+#define IP_MF 0x20
+
+static u8_t uip_reass(void) {
+    u16_t offset, len;
+    u16_t i;
+
+    /* If ip_reasstmr is zero, no packet is present in the buffer, so we
+       write the IP header of the fragment into the reassembly
+       buffer. The timer is updated with the maximum age. */
+    if (uip_reasstmr == 0) {
+        memcpy(uip_reassbuf, &BUF->vhl, UIP_IPH_LEN);
+        uip_reasstmr = UIP_REASS_MAXAGE;
+        uip_reassflags = 0;
+        /* Clear the bitmap. */
+        memset(uip_reassbitmap, 0, sizeof(uip_reassbitmap));
+    }
+
+    /* Check if the incoming fragment matches the one currently present
+       in the reasembly buffer. If so, we proceed with copying the
+       fragment into the buffer. */
+    if (BUF->srcipaddr[0] == FBUF->srcipaddr[0] && BUF->srcipaddr[1] == FBUF->srcipaddr[1] &&
+        BUF->destipaddr[0] == FBUF->destipaddr[0] && BUF->destipaddr[1] == FBUF->destipaddr[1] &&
+        BUF->ipid[0] == FBUF->ipid[0] && BUF->ipid[1] == FBUF->ipid[1]) {
+
+        len = (BUF->len[0] << 8) + BUF->len[1] - (BUF->vhl & 0x0f) * 4;
+        offset = (((BUF->ipoffset[0] & 0x3f) << 8) + BUF->ipoffset[1]) * 8;
+
+        /* If the offset or the offset + fragment length overflows the
+           reassembly buffer, we discard the entire packet. */
+        if (offset > UIP_REASS_BUFSIZE || offset + len > UIP_REASS_BUFSIZE) {
+            uip_reasstmr = 0;
+            goto nullreturn;
+        }
+
+        /* Copy the fragment into the reassembly buffer, at the right
+           offset. */
+        memcpy(&uip_reassbuf[UIP_IPH_LEN + offset], (char *)BUF + (int)((BUF->vhl & 0x0f) * 4),
+               len);
+
+        /* Update the bitmap. */
+        if (offset / (8 * 8) == (offset + len) / (8 * 8)) {
+            /* If the two endpoints are in the same byte, we only update
+               that byte. */
+
+            uip_reassbitmap[offset / (8 * 8)] |=
+                bitmap_bits[(offset / 8) & 7] & ~bitmap_bits[((offset + len) / 8) & 7];
+        } else {
+            /* If the two endpoints are in different bytes, we update the
+               bytes in the endpoints and fill the stuff inbetween with
+               0xff. */
+            uip_reassbitmap[offset / (8 * 8)] |= bitmap_bits[(offset / 8) & 7];
+            for (i = 1 + offset / (8 * 8); i < (offset + len) / (8 * 8); ++i) {
+                uip_reassbitmap[i] = 0xff;
+            }
+            uip_reassbitmap[(offset + len) / (8 * 8)] |= ~bitmap_bits[((offset + len) / 8) & 7];
+        }
+
+        /* If this fragment has the More Fragments flag set to zero, we
+           know that this is the last fragment, so we can calculate the
+           size of the entire packet. We also set the
+           IP_REASS_FLAG_LASTFRAG flag to indicate that we have received
+           the final fragment. */
+
+        if ((BUF->ipoffset[0] & IP_MF) == 0) {
+            uip_reassflags |= UIP_REASS_FLAG_LASTFRAG;
+            uip_reasslen = offset + len;
+        }
+
+        /* Finally, we check if we have a full packet in the buffer. We do
+           this by checking if we have the last fragment and if all bits
+           in the bitmap are set. */
+        if (uip_reassflags & UIP_REASS_FLAG_LASTFRAG) {
+            /* Check all bytes up to and including all but the last byte in
+               the bitmap. */
+            for (i = 0; i < uip_reasslen / (8 * 8) - 1; ++i) {
+                if (uip_reassbitmap[i] != 0xff) {
+                    goto nullreturn;
+                }
+            }
+            /* Check the last byte in the bitmap. It should contain just the
+               right amount of bits. */
+            if (uip_reassbitmap[uip_reasslen / (8 * 8)] !=
+                (u8_t)~bitmap_bits[uip_reasslen / 8 & 7]) {
+                goto nullreturn;
+            }
+
+            /* If we have come this far, we have a full packet in the
+               buffer, so we allocate a pbuf and copy the packet into it. We
+               also reset the timer. */
+            uip_reasstmr = 0;
+            memcpy(BUF, FBUF, uip_reasslen);
+
+            /* Pretend to be a "normal" (i.e., not fragmented) IP packet
+               from now on. */
+            BUF->ipoffset[0] = BUF->ipoffset[1] = 0;
+            BUF->len[0] = uip_reasslen >> 8;
+            BUF->len[1] = uip_reasslen & 0xff;
+            BUF->ipchksum = 0;
+            BUF->ipchksum = ~(uip_ipchksum());
+
+            return uip_reasslen;
+        }
+    }
+
+nullreturn:
+    return 0;
+}
+#endif /* UIP_REASSEMBLY */
+/*---------------------------------------------------------------------------*/
 static void uip_add_rcv_nxt(u16_t n) {
     uip_add32(uip_conn->rcv_nxt, n);
     uip_conn->rcv_nxt[0] = uip_acc32[0];
@@ -207,6 +558,7 @@ static void uip_add_rcv_nxt(u16_t n) {
 }
 
 void uip_process(u8_t flag) {
+    uip_log("uip_process called");
     register struct uip_conn *uip_connr = uip_conn;
 
     uip_sappdata = uip_appdata = &uip_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
@@ -246,7 +598,8 @@ void uip_process(u8_t flag) {
            for the connection to time out. If so, we increase the
            connection's timer and remove the connection if it times
            out. */
-        if (uip_connr->tcpstateflags == UIP_TIME_WAIT || uip_connr->tcpstateflags == UIP_FIN_WAIT_2) {
+        if (uip_connr->tcpstateflags == UIP_TIME_WAIT ||
+            uip_connr->tcpstateflags == UIP_FIN_WAIT_2) {
             ++(uip_connr->timer);
             if (uip_connr->timer == UIP_TIME_WAIT_TIMEOUT) {
                 uip_connr->tcpstateflags = UIP_CLOSED;
@@ -257,7 +610,10 @@ void uip_process(u8_t flag) {
                in which case we retransmit. */
             if (uip_outstanding(uip_connr)) {
                 if (uip_connr->timer-- == 0) {
-                    if (uip_connr->nrtx == UIP_MAXRTX || ((uip_connr->tcpstateflags == UIP_SYN_SENT || uip_connr->tcpstateflags == UIP_SYN_RCVD) && uip_connr->nrtx == UIP_MAXSYNRTX)) {
+                    if (uip_connr->nrtx == UIP_MAXRTX ||
+                        ((uip_connr->tcpstateflags == UIP_SYN_SENT ||
+                          uip_connr->tcpstateflags == UIP_SYN_RCVD) &&
+                         uip_connr->nrtx == UIP_MAXSYNRTX)) {
                         uip_connr->tcpstateflags = UIP_CLOSED;
 
                         /* We call UIP_APPCALL() with uip_flags set to
@@ -1146,31 +1502,17 @@ drop:
     uip_len = 0;
     uip_flags = 0;
     return;
-
 }
 
-// +---------------------------------------------------------+
-// |                        UNLISTEN                         |
-// +---------------------------------------------------------+
-void uip_unlisten(u16_t port) {
-    for (c = 0; c < UIP_LISTENPORTS; ++c) {
-        if (uip_listenports[c] == port) {
-            uip_listenports[c] = 0;
-            return;
+u16_t htons(u16_t val) { return HTONS(val); }
+
+void uip_send(const void *data, int len) {
+    if (len > 0) {
+        uip_slen = len;
+        if (data != uip_sappdata) {
+            memcpy(uip_sappdata, (data), uip_slen);
         }
     }
 }
 
-// +---------------------------------------------------------+
-// |                         LISTEN                          |
-// +---------------------------------------------------------+
-void uip_listen(u16_t port) {
-    for (c = 0; c < UIP_LISTENPORTS; ++c) {
-        if (uip_listenports[c] == 0) {
-            uip_listenports[c] = port;
-            return;
-        }
-    }
-}
-
-// TODO: understand what is this APP FUCKING CALL
+void uip_log(char *m) { printf("uIP log message: %s\n", m); }

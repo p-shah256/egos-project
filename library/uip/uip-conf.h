@@ -55,7 +55,8 @@
 #ifndef __UIP_CONF_H__
 #define __UIP_CONF_H__
 
-#include <inttypes.h>
+// #include <inttypes.h>
+#include "egos.h"
 
 /**
  * 8 bit datatype
@@ -64,7 +65,7 @@
  *
  * \hideinitializer
  */
-typedef uint8_t u8_t;
+typedef m_uint8 u8_t;
 
 /**
  * 16 bit datatype
@@ -73,7 +74,7 @@ typedef uint8_t u8_t;
  *
  * \hideinitializer
  */
-typedef uint16_t u16_t;
+typedef m_uint16 u16_t;
 
 /**
  * Statistics datatype
