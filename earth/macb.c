@@ -16,7 +16,6 @@
 #define MACB_TX_RING_SIZE		16
 
 #define MACB_TX_TIMEOUT		1000
-#define MACB_AUTONEG_TIMEOUT	5000000
 
 
 struct macb_dma_desc {
@@ -24,24 +23,17 @@ struct macb_dma_desc {
 	m_uint32 ctrl;
 };
 
-#define ARCH_DMA_MINALIGN   64
+#define ARCH_DMA_MINALIGN   32
 
-#define DMA_DESC_SIZE		16 // Check these dma desc size is 8 bytes only
+#define DMA_DESC_SIZE		8 
 #define DMA_DESC_BYTES(n)	((n) * DMA_DESC_SIZE)
 #define MACB_TX_DMA_DESC_SIZE	(DMA_DESC_BYTES(MACB_TX_RING_SIZE))
 #define MACB_RX_DMA_DESC_SIZE	(DMA_DESC_BYTES(MACB_RX_RING_SIZE))
-
-#define DESC_PER_CACHELINE_32	(ARCH_DMA_MINALIGN/sizeof(struct macb_dma_desc))
-#define DESC_PER_CACHELINE_64	(ARCH_DMA_MINALIGN/DMA_DESC_SIZE)
 
 #define RXBUF_FRMLEN_MASK	0x00000fff
 #define TXBUF_FRMLEN_MASK	0x000007ff
 
 #define BUSY_LOOP 10000
-
-#define CACHE_CONTROLLER_BASE 0x2010000
-#define CACHE_FLUSH_64 0x200
-#define CACHE_FLUSH_32 0x240
 
 struct macb_device {
 	void			*base;
@@ -210,7 +202,7 @@ int macb_phy_init()
 	CRITICAL("PHY Link up, %sMbps %s-duplex (lpa: 0x%04x)", speed ? "100" : "10", duplex ? "full" : "half", lpa);
 
 	ncfgr = macb_readl(macb, NCFGR);
-	ncfgr &= ~(MACB_BIT(SPD) | MACB_BIT(FD) | GEM_BIT(GBE));
+	ncfgr &= ~(MACB_BIT(SPD) | MACB_BIT(FD));
 	if (speed) {
 		ncfgr |= MACB_BIT(SPD);
 	}
@@ -220,21 +212,6 @@ int macb_phy_init()
 	macb_writel(macb, NCFGR, ncfgr);
 
 	return 0;
-}
-
-void flush_dcache_range(unsigned long start_addr, unsigned long size) {
-	unsigned long end_addr = start_addr + size;
-
-	// Align to 32-byte or 64-byte boundary depending on which you need
-	// For 64-byte alignment (matching cache line size):
-	start_addr &= ~(64UL - 1);
-
-	for (unsigned long addr = start_addr; addr < end_addr; addr += 64) {
-		REGW(CACHE_CONTROLLER_BASE, CACHE_FLUSH_64) = addr;
-
-		// Memory barrier to ensure completion
-		barrier();
-	}
 }
 
 void macb_start() {
@@ -251,11 +228,10 @@ void macb_start() {
 		macb.rx_ring[i].addr = paddr;
 		paddr += macb.rx_buffer_size;
 	}
-	flush_dcache_range(macb.rx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
-	flush_dcache_range((m_uint32)macb.rx_buffer, macb.rx_buffer_size * MACB_RX_RING_SIZE);
-	// INFO("Size of dma_desc: %d", sizeof(struct macb_dma_desc));
+	// Flush RX ring dma desc if cache is available
+	// Flush RX buffer if cache is available
+	
 	for (i = 0; i < MACB_TX_RING_SIZE; i++) {
-		// INFO("i = %d", i);
 		macb.tx_ring[i].addr = 0;
 		if (i == (MACB_TX_RING_SIZE - 1))
 			macb.tx_ring[i].ctrl = MACB_BIT(TX_USED) |
@@ -263,7 +239,7 @@ void macb_start() {
 		else
 			macb.tx_ring[i].ctrl = MACB_BIT(TX_USED);
 	}
-	flush_dcache_range(macb.tx_ring_dma[0], MACB_TX_DMA_DESC_SIZE);
+	// Flush TX dma desc if cache is available
 
 	macb.rx_tail = 0;
 	macb.tx_head = 0;
@@ -279,19 +255,6 @@ void macb_start() {
 
 	/* Enable TX and RX */
 	macb_writel(macb, NCR, MACB_BIT(TE) | MACB_BIT(RE));
-}
-
-void invalidate_cache(m_uint32 start_addr, m_uint32 size) {
-	// unsigned long end_addr = start_addr + size;
-
-	// // Invalidate each cache line in the range
-	// for (unsigned long addr = start_addr; addr < end_addr; addr += 64) {
-	//     // CBO.INVAL invalidates without writing back
-	//     asm volatile("cbo.inval (%0)" :: "r"(addr));
-	// }
-
-	// Ensure invalidation is complete
-	asm volatile("fence");
 }
 
 void delay(int itrs) {
@@ -321,18 +284,12 @@ void macb_send(int length, void *packet) {
 	macb.tx_ring[tx_head].addr = (m_uint32)packet;
 
 	barrier();
-	flush_dcache_range(macb.tx_ring_dma[0], MACB_TX_DMA_DESC_SIZE);
+	// Flush TX ring dma desc if cache is available
 	macb_writel(macb, NCR, MACB_BIT(TE) | MACB_BIT(RE) | MACB_BIT(TSTART));
 
-	// INFO("Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
-	/*
-    * I guess this is necessary because the networking core may
-    * re-use the transmit buffer as soon as we return...
-    */
 	for (i = 0; i <= MACB_TX_TIMEOUT; i++) {
 		barrier();
-		// INFO("Testing %d", i);
-		// invalidate_cache(macb.tx_ring_dma[0], MACB_TX_DMA_DESC_SIZE);
+		// Invalidate cache for TX ring dma desc to get the latest data from memory if cache is present
 		ctrl = macb.tx_ring[tx_head].ctrl;
 		// INFO("Test Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
 		if (ctrl & MACB_BIT(TX_USED))
@@ -352,36 +309,17 @@ void macb_send(int length, void *packet) {
 }
 
 static void reclaim_rx_buffer(unsigned int idx) {
-	unsigned int mask;
-	unsigned int shift;
-	unsigned int i;
-
-	/*
-    * There may be multiple descriptors per CPU cacheline,
-    * so a cache flush would flush the whole line, meaning the content of other descriptors
-    * in the cacheline would also flush. If one of the other descriptors had been
-    * written to by the controller, the flush would cause those changes to be lost.
-    *
-    * To circumvent this issue, we do the actual freeing only when we need to free
-    * the last descriptor in the current cacheline. When the current descriptor is the
-    * last in the cacheline, we free all the descriptors that belong to that cacheline.
-    */
-	mask = DESC_PER_CACHELINE_32 - 1;
-	shift = 0;
-
-	/* we exit without freeing if idx is not the last descriptor in the cacheline */
-	if ((idx & mask) != mask)
-		return;
-
-	for (i = idx & (~mask); i <= idx; i++)
-		macb.rx_ring[i << shift].addr &= ~MACB_BIT(RX_USED);
+	// If caches are available, one needs to add extra logic to to ensure that these updates
+	// should not flush everytime since, DMA might be working on memory and we might overwrite those changes
+	// if we flush from cache.
+	macb.rx_ring[idx].addr &= ~MACB_BIT(RX_USED);
 }
 
 void reclaim_rx_buffers(unsigned int new_tail) {
 	unsigned int i;
 	i = macb.rx_tail;
 
-	// macb_invalidate_ring_desc(macb, RX);
+	// Invalidate the RX ring dma desc if cache is available
 	while (i > new_tail) {
 		reclaim_rx_buffer(i);
 		i++;
@@ -395,7 +333,7 @@ void reclaim_rx_buffers(unsigned int new_tail) {
 	}
 
 	barrier();
-	flush_dcache_range(macb.rx_ring_dma[0], MACB_RX_DMA_DESC_SIZE);
+	// Flush RX ring dma desc if cache is available
 	macb.rx_tail = new_tail;
 }
 
@@ -411,7 +349,7 @@ int _macb_recv(void *packetp) {
 
 	macb.wrapped = 0;
 	for (;;) {
-		// macb_invalidate_ring_desc(macb, RX);
+		// Invalidate RX ring dma desc if cache is available
 
 		if (!(macb.rx_ring[next_rx_tail].addr & MACB_BIT(RX_USED)))
 			return -1;
@@ -428,7 +366,8 @@ int _macb_recv(void *packetp) {
 			buffer = macb.rx_buffer + macb.rx_buffer_size * macb.rx_tail;
 			length = status & RXBUF_FRMLEN_MASK;
 			ASSERT(length < 256, "Cannot handle packets more than 256 bytes right now!");
-			// macb_invalidate_rx_buffer(macb);
+
+			// Invalidate RX buffer if cache is available
 			if (macb.wrapped) {
 				unsigned int headlen, taillen;
 

@@ -117,130 +117,6 @@
 #define MACB_TBQPH		0x04C8
 #define MACB_RBQPH		0x04D4
 
-/* GEM register offsets. */
-#define GEM_NCFGR		0x0004 /* Network Config */
-#define GEM_USRIO		0x000c /* User IO */
-#define GEM_DMACFG		0x0010 /* DMA Configuration */
-#define GEM_JML			0x0048 /* Jumbo Max Length */
-#define GEM_HRB			0x0080 /* Hash Bottom */
-#define GEM_HRT			0x0084 /* Hash Top */
-#define GEM_SA1B		0x0088 /* Specific1 Bottom */
-#define GEM_SA1T		0x008C /* Specific1 Top */
-#define GEM_SA2B		0x0090 /* Specific2 Bottom */
-#define GEM_SA2T		0x0094 /* Specific2 Top */
-#define GEM_SA3B		0x0098 /* Specific3 Bottom */
-#define GEM_SA3T		0x009C /* Specific3 Top */
-#define GEM_SA4B		0x00A0 /* Specific4 Bottom */
-#define GEM_SA4T		0x00A4 /* Specific4 Top */
-#define GEM_EFTSH		0x00e8 /* PTP Event Frame Transmitted Seconds Register 47:32 */
-#define GEM_EFRSH		0x00ec /* PTP Event Frame Received Seconds Register 47:32 */
-#define GEM_PEFTSH		0x00f0 /* PTP Peer Event Frame Transmitted Seconds Register 47:32 */
-#define GEM_PEFRSH		0x00f4 /* PTP Peer Event Frame Received Seconds Register 47:32 */
-#define GEM_OTX			0x0100 /* Octets transmitted */
-#define GEM_OCTTXL		0x0100 /* Octets transmitted [31:0] */
-#define GEM_OCTTXH		0x0104 /* Octets transmitted [47:32] */
-#define GEM_TXCNT		0x0108 /* Frames Transmitted counter */
-#define GEM_TXBCCNT		0x010c /* Broadcast Frames counter */
-#define GEM_TXMCCNT		0x0110 /* Multicast Frames counter */
-#define GEM_TXPAUSECNT		0x0114 /* Pause Frames Transmitted Counter */
-#define GEM_TX64CNT		0x0118 /* 64 byte Frames TX counter */
-#define GEM_TX65CNT		0x011c /* 65-127 byte Frames TX counter */
-#define GEM_TX128CNT		0x0120 /* 128-255 byte Frames TX counter */
-#define GEM_TX256CNT		0x0124 /* 256-511 byte Frames TX counter */
-#define GEM_TX512CNT		0x0128 /* 512-1023 byte Frames TX counter */
-#define GEM_TX1024CNT		0x012c /* 1024-1518 byte Frames TX counter */
-#define GEM_TX1519CNT		0x0130 /* 1519+ byte Frames TX counter */
-#define GEM_TXURUNCNT		0x0134 /* TX under run error counter */
-#define GEM_SNGLCOLLCNT		0x0138 /* Single Collision Frame Counter */
-#define GEM_MULTICOLLCNT	0x013c /* Multiple Collision Frame Counter */
-#define GEM_EXCESSCOLLCNT	0x0140 /* Excessive Collision Frame Counter */
-#define GEM_LATECOLLCNT		0x0144 /* Late Collision Frame Counter */
-#define GEM_TXDEFERCNT		0x0148 /* Deferred Transmission Frame Counter */
-#define GEM_TXCSENSECNT		0x014c /* Carrier Sense Error Counter */
-#define GEM_ORX			0x0150 /* Octets received */
-#define GEM_OCTRXL		0x0150 /* Octets received [31:0] */
-#define GEM_OCTRXH		0x0154 /* Octets received [47:32] */
-#define GEM_RXCNT		0x0158 /* Frames Received Counter */
-#define GEM_RXBROADCNT		0x015c /* Broadcast Frames Received Counter */
-#define GEM_RXMULTICNT		0x0160 /* Multicast Frames Received Counter */
-#define GEM_RXPAUSECNT		0x0164 /* Pause Frames Received Counter */
-#define GEM_RX64CNT		0x0168 /* 64 byte Frames RX Counter */
-#define GEM_RX65CNT		0x016c /* 65-127 byte Frames RX Counter */
-#define GEM_RX128CNT		0x0170 /* 128-255 byte Frames RX Counter */
-#define GEM_RX256CNT		0x0174 /* 256-511 byte Frames RX Counter */
-#define GEM_RX512CNT		0x0178 /* 512-1023 byte Frames RX Counter */
-#define GEM_RX1024CNT		0x017c /* 1024-1518 byte Frames RX Counter */
-#define GEM_RX1519CNT		0x0180 /* 1519+ byte Frames RX Counter */
-#define GEM_RXUNDRCNT		0x0184 /* Undersize Frames Received Counter */
-#define GEM_RXOVRCNT		0x0188 /* Oversize Frames Received Counter */
-#define GEM_RXJABCNT		0x018c /* Jabbers Received Counter */
-#define GEM_RXFCSCNT		0x0190 /* Frame Check Sequence Error Counter */
-#define GEM_RXLENGTHCNT		0x0194 /* Length Field Error Counter */
-#define GEM_RXSYMBCNT		0x0198 /* Symbol Error Counter */
-#define GEM_RXALIGNCNT		0x019c /* Alignment Error Counter */
-#define GEM_RXRESERRCNT		0x01a0 /* Receive Resource Error Counter */
-#define GEM_RXORCNT		0x01a4 /* Receive Overrun Counter */
-#define GEM_RXIPCCNT		0x01a8 /* IP header Checksum Error Counter */
-#define GEM_RXTCPCCNT		0x01ac /* TCP Checksum Error Counter */
-#define GEM_RXUDPCCNT		0x01b0 /* UDP Checksum Error Counter */
-#define GEM_TISUBN		0x01bc /* 1588 Timer Increment Sub-ns */
-#define GEM_TSH			0x01c0 /* 1588 Timer Seconds High */
-#define GEM_TSL			0x01d0 /* 1588 Timer Seconds Low */
-#define GEM_TN			0x01d4 /* 1588 Timer Nanoseconds */
-#define GEM_TA			0x01d8 /* 1588 Timer Adjust */
-#define GEM_TI			0x01dc /* 1588 Timer Increment */
-#define GEM_EFTSL		0x01e0 /* PTP Event Frame Tx Seconds Low */
-#define GEM_EFTN		0x01e4 /* PTP Event Frame Tx Nanoseconds */
-#define GEM_EFRSL		0x01e8 /* PTP Event Frame Rx Seconds Low */
-#define GEM_EFRN		0x01ec /* PTP Event Frame Rx Nanoseconds */
-#define GEM_PEFTSL		0x01f0 /* PTP Peer Event Frame Tx Secs Low */
-#define GEM_PEFTN		0x01f4 /* PTP Peer Event Frame Tx Ns */
-#define GEM_PEFRSL		0x01f8 /* PTP Peer Event Frame Rx Sec Low */
-#define GEM_PEFRN		0x01fc /* PTP Peer Event Frame Rx Ns */
-#define GEM_DCFG1		0x0280 /* Design Config 1 */
-#define GEM_DCFG2		0x0284 /* Design Config 2 */
-#define GEM_DCFG3		0x0288 /* Design Config 3 */
-#define GEM_DCFG4		0x028c /* Design Config 4 */
-#define GEM_DCFG5		0x0290 /* Design Config 5 */
-#define GEM_DCFG6		0x0294 /* Design Config 6 */
-#define GEM_DCFG7		0x0298 /* Design Config 7 */
-#define GEM_DCFG8		0x029C /* Design Config 8 */
-#define GEM_DCFG10		0x02A4 /* Design Config 10 */
-
-#define GEM_TXBDCTRL	0x04cc /* TX Buffer Descriptor control register */
-#define GEM_RXBDCTRL	0x04d0 /* RX Buffer Descriptor control register */
-
-/* Screener Type 2 match registers */
-#define GEM_SCRT2		0x540
-
-/* EtherType registers */
-#define GEM_ETHT		0x06E0
-
-/* Type 2 compare registers */
-#define GEM_T2CMPW0		0x0700
-#define GEM_T2CMPW1		0x0704
-#define T2CMP_OFST(t2idx)	(t2idx * 2)
-
-/* type 2 compare registers
- * each location requires 3 compare regs
- */
-#define GEM_IP4SRC_CMP(idx)		(idx * 3)
-#define GEM_IP4DST_CMP(idx)		(idx * 3 + 1)
-#define GEM_PORT_CMP(idx)		(idx * 3 + 2)
-
-/* Which screening type 2 EtherType register will be used (0 - 7) */
-#define SCRT2_ETHT		0
-
-#define GEM_ISR(hw_q)		(0x0400 + ((hw_q) << 2))
-#define GEM_TBQP(hw_q)		(0x0440 + ((hw_q) << 2))
-#define GEM_TBQPH(hw_q)		(0x04C8)
-#define GEM_RBQP(hw_q)		(0x0480 + ((hw_q) << 2))
-#define GEM_RBQS(hw_q)		(0x04A0 + ((hw_q) << 2))
-#define GEM_RBQPH(hw_q)		(0x04D4)
-#define GEM_IER(hw_q)		(0x0600 + ((hw_q) << 2))
-#define GEM_IDR(hw_q)		(0x0620 + ((hw_q) << 2))
-#define GEM_IMR(hw_q)		(0x0640 + ((hw_q) << 2))
-
 /* Bitfields in NCR */
 #define MACB_LB_OFFSET		0 /* reserved */
 #define MACB_LB_SIZE		1
@@ -311,49 +187,6 @@
 #define MACB_EFRHD_SIZE		1
 #define MACB_IRXFCS_OFFSET	19
 #define MACB_IRXFCS_SIZE	1
-
-/* GEM specific NCFGR bitfields. */
-#define GEM_GBE_OFFSET		10 /* Gigabit mode enable */
-#define GEM_GBE_SIZE		1
-#define GEM_PCSSEL_OFFSET	11
-#define GEM_PCSSEL_SIZE		1
-#define GEM_CLK_OFFSET		18 /* MDC clock division */
-#define GEM_CLK_SIZE		3
-#define GEM_DBW_OFFSET		21 /* Data bus width */
-#define GEM_DBW_SIZE		2
-#define GEM_RXCOEN_OFFSET	24
-#define GEM_RXCOEN_SIZE		1
-#define GEM_SGMIIEN_OFFSET	27
-#define GEM_SGMIIEN_SIZE	1
-
-/* Constants for data bus width. */
-#define GEM_DBW32		0 /* 32 bit AMBA AHB data bus width */
-#define GEM_DBW64		1 /* 64 bit AMBA AHB data bus width */
-#define GEM_DBW128		2 /* 128 bit AMBA AHB data bus width */
-
-/* Bitfields in DMACFG. */
-#define GEM_FBLDO_OFFSET	0 /* fixed burst length for DMA */
-#define GEM_FBLDO_SIZE		5
-#define GEM_ENDIA_DESC_OFFSET	6 /* endian swap mode for management descriptor access */
-#define GEM_ENDIA_DESC_SIZE	1
-#define GEM_ENDIA_PKT_OFFSET	7 /* endian swap mode for packet data access */
-#define GEM_ENDIA_PKT_SIZE	1
-#define GEM_RXBMS_OFFSET	8 /* RX packet buffer memory size select */
-#define GEM_RXBMS_SIZE		2
-#define GEM_TXPBMS_OFFSET	10 /* TX packet buffer memory size select */
-#define GEM_TXPBMS_SIZE		1
-#define GEM_TXCOEN_OFFSET	11 /* TX IP/TCP/UDP checksum gen offload */
-#define GEM_TXCOEN_SIZE		1
-#define GEM_RXBS_OFFSET		16 /* DMA receive buffer size */
-#define GEM_RXBS_SIZE		8
-#define GEM_DDRP_OFFSET		24 /* disc_when_no_ahb */
-#define GEM_DDRP_SIZE		1
-#define GEM_RXEXT_OFFSET	28 /* RX extended Buffer Descriptor mode */
-#define GEM_RXEXT_SIZE		1
-#define GEM_TXEXT_OFFSET	29 /* TX extended Buffer Descriptor mode */
-#define GEM_TXEXT_SIZE		1
-#define GEM_ADDR64_OFFSET	30 /* Address bus width - 64b or 32b */
-#define GEM_ADDR64_SIZE		1
 
 /* Bitfields in NSR */
 #define MACB_NSR_LINK_OFFSET	0 /* pcs_link_state */
@@ -495,124 +328,6 @@
 #define MACB_REV_OFFSET				0
 #define MACB_REV_SIZE				16
 
-/* Bitfields in DCFG1. */
-#define GEM_IRQCOR_OFFSET			23
-#define GEM_IRQCOR_SIZE				1
-#define GEM_DBWDEF_OFFSET			25
-#define GEM_DBWDEF_SIZE				3
-
-/* Bitfields in DCFG2. */
-#define GEM_RX_PKT_BUFF_OFFSET			20
-#define GEM_RX_PKT_BUFF_SIZE			1
-#define GEM_TX_PKT_BUFF_OFFSET			21
-#define GEM_TX_PKT_BUFF_SIZE			1
-
-/* Bitfields in DCFG5. */
-#define GEM_TSU_OFFSET				8
-#define GEM_TSU_SIZE				1
-
-/* Bitfields in DCFG6. */
-#define GEM_PBUF_LSO_OFFSET			27
-#define GEM_PBUF_LSO_SIZE			1
-#define GEM_DAW64_OFFSET			23
-#define GEM_DAW64_SIZE				1
-
-/* Bitfields in DCFG8. */
-#define GEM_T1SCR_OFFSET			24
-#define GEM_T1SCR_SIZE				8
-#define GEM_T2SCR_OFFSET			16
-#define GEM_T2SCR_SIZE				8
-#define GEM_SCR2ETH_OFFSET			8
-#define GEM_SCR2ETH_SIZE			8
-#define GEM_SCR2CMP_OFFSET			0
-#define GEM_SCR2CMP_SIZE			8
-
-/* Bitfields in DCFG10 */
-#define GEM_TXBD_RDBUFF_OFFSET			12
-#define GEM_TXBD_RDBUFF_SIZE			4
-#define GEM_RXBD_RDBUFF_OFFSET			8
-#define GEM_RXBD_RDBUFF_SIZE			4
-
-/* Bitfields in TISUBN */
-#define GEM_SUBNSINCR_OFFSET			0
-#define GEM_SUBNSINCR_SIZE			16
-
-/* Bitfields in TI */
-#define GEM_NSINCR_OFFSET			0
-#define GEM_NSINCR_SIZE				8
-
-/* Bitfields in TSH */
-#define GEM_TSH_OFFSET				0 /* TSU timer value (s). MSB [47:32] of seconds timer count */
-#define GEM_TSH_SIZE				16
-
-/* Bitfields in TSL */
-#define GEM_TSL_OFFSET				0 /* TSU timer value (s). LSB [31:0] of seconds timer count */
-#define GEM_TSL_SIZE				32
-
-/* Bitfields in TN */
-#define GEM_TN_OFFSET				0 /* TSU timer value (ns) */
-#define GEM_TN_SIZE					30
-
-/* Bitfields in TXBDCTRL */
-#define GEM_TXTSMODE_OFFSET			4 /* TX Descriptor Timestamp Insertion mode */
-#define GEM_TXTSMODE_SIZE			2
-
-/* Bitfields in RXBDCTRL */
-#define GEM_RXTSMODE_OFFSET			4 /* RX Descriptor Timestamp Insertion mode */
-#define GEM_RXTSMODE_SIZE			2
-
-/* Bitfields in SCRT2 */
-#define GEM_QUEUE_OFFSET			0 /* Queue Number */
-#define GEM_QUEUE_SIZE				4
-#define GEM_VLANPR_OFFSET			4 /* VLAN Priority */
-#define GEM_VLANPR_SIZE				3
-#define GEM_VLANEN_OFFSET			8 /* VLAN Enable */
-#define GEM_VLANEN_SIZE				1
-#define GEM_ETHT2IDX_OFFSET			9 /* Index to screener type 2 EtherType register */
-#define GEM_ETHT2IDX_SIZE			3
-#define GEM_ETHTEN_OFFSET			12 /* EtherType Enable */
-#define GEM_ETHTEN_SIZE				1
-#define GEM_CMPA_OFFSET				13 /* Compare A - Index to screener type 2 Compare register */
-#define GEM_CMPA_SIZE				5
-#define GEM_CMPAEN_OFFSET			18 /* Compare A Enable */
-#define GEM_CMPAEN_SIZE				1
-#define GEM_CMPB_OFFSET				19 /* Compare B - Index to screener type 2 Compare register */
-#define GEM_CMPB_SIZE				5
-#define GEM_CMPBEN_OFFSET			24 /* Compare B Enable */
-#define GEM_CMPBEN_SIZE				1
-#define GEM_CMPC_OFFSET				25 /* Compare C - Index to screener type 2 Compare register */
-#define GEM_CMPC_SIZE				5
-#define GEM_CMPCEN_OFFSET			30 /* Compare C Enable */
-#define GEM_CMPCEN_SIZE				1
-
-/* Bitfields in ETHT */
-#define GEM_ETHTCMP_OFFSET			0 /* EtherType compare value */
-#define GEM_ETHTCMP_SIZE			16
-
-/* Bitfields in T2CMPW0 */
-#define GEM_T2CMP_OFFSET			16 /* 0xFFFF0000 compare value */
-#define GEM_T2CMP_SIZE				16
-#define GEM_T2MASK_OFFSET			0 /* 0x0000FFFF compare value or mask */
-#define GEM_T2MASK_SIZE				16
-
-/* Bitfields in T2CMPW1 */
-#define GEM_T2DISMSK_OFFSET			9 /* disable mask */
-#define GEM_T2DISMSK_SIZE			1
-#define GEM_T2CMPOFST_OFFSET			7 /* compare offset */
-#define GEM_T2CMPOFST_SIZE			2
-#define GEM_T2OFST_OFFSET			0 /* offset value */
-#define GEM_T2OFST_SIZE				7
-
-/* Offset for screener type 2 compare values (T2CMPOFST).
- * Note the offset is applied after the specified point,
- * e.g. GEM_T2COMPOFST_ETYPE denotes the EtherType field, so an offset
- * of 12 bytes from this would be the source IP address in an IP header
- */
-#define GEM_T2COMPOFST_SOF		0
-#define GEM_T2COMPOFST_ETYPE	1
-#define GEM_T2COMPOFST_IPHDR	2
-#define GEM_T2COMPOFST_TCPUDP	3
-
 /* offset from EtherType to IP address */
 #define ETYPE_SRCIP_OFFSET			12
 #define ETYPE_DSTIP_OFFSET			16
@@ -621,50 +336,11 @@
 #define IPHDR_SRCPORT_OFFSET		0
 #define IPHDR_DSTPORT_OFFSET		2
 
-/* Transmit DMA buffer descriptor Word 1 */
-#define GEM_DMA_TXVALID_OFFSET		23 /* timestamp has been captured in the Buffer Descriptor */
-#define GEM_DMA_TXVALID_SIZE		1
-
-/* Receive DMA buffer descriptor Word 0 */
-#define GEM_DMA_RXVALID_OFFSET		2 /* indicates a valid timestamp in the Buffer Descriptor */
-#define GEM_DMA_RXVALID_SIZE		1
-
-/* DMA buffer descriptor Word 2 (32 bit addressing) or Word 4 (64 bit addressing) */
-#define GEM_DMA_SECL_OFFSET			30 /* Timestamp seconds[1:0]  */
-#define GEM_DMA_SECL_SIZE			2
-#define GEM_DMA_NSEC_OFFSET			0 /* Timestamp nanosecs [29:0] */
-#define GEM_DMA_NSEC_SIZE			30
-
-/* DMA buffer descriptor Word 3 (32 bit addressing) or Word 5 (64 bit addressing) */
-
-/* New hardware supports 12 bit precision of timestamp in DMA buffer descriptor.
- * Old hardware supports only 6 bit precision but it is enough for PTP.
- * Less accuracy is used always instead of checking hardware version.
- */
-#define GEM_DMA_SECH_OFFSET			0 /* Timestamp seconds[5:2] */
-#define GEM_DMA_SECH_SIZE			4
-#define GEM_DMA_SEC_WIDTH			(GEM_DMA_SECH_SIZE + GEM_DMA_SECL_SIZE)
-#define GEM_DMA_SEC_TOP				(1 << GEM_DMA_SEC_WIDTH)
-#define GEM_DMA_SEC_MASK			(GEM_DMA_SEC_TOP - 1)
-
-/* Bitfields in ADJ */
-#define GEM_ADDSUB_OFFSET			31
-#define GEM_ADDSUB_SIZE				1
 /* Constants for CLK */
 #define MACB_CLK_DIV8				0
 #define MACB_CLK_DIV16				1
 #define MACB_CLK_DIV32				2
 #define MACB_CLK_DIV64				3
-
-/* GEM specific constants for CLK */
-#define GEM_CLK_DIV8				0
-#define GEM_CLK_DIV16				1
-#define GEM_CLK_DIV32				2
-#define GEM_CLK_DIV48				3
-#define GEM_CLK_DIV64				4
-#define GEM_CLK_DIV96				5
-#define GEM_CLK_DIV128				6
-#define GEM_CLK_DIV224				7
 
 /* Constants for MAN register */
 #define MACB_MAN_SOF				1
@@ -704,19 +380,6 @@
 	(((old) & ~(((1 << MACB_##name##_SIZE) - 1)	\
 		    << MACB_##name##_OFFSET))		\
 	 | MACB_BF(name,value))
-
-#define GEM_BIT(name)					\
-	(1 << GEM_##name##_OFFSET)
-#define GEM_BF(name, value)				\
-	(((value) & ((1 << GEM_##name##_SIZE) - 1))	\
-	 << GEM_##name##_OFFSET)
-#define GEM_BFEXT(name, value)\
-	(((value) >> GEM_##name##_OFFSET)		\
-	 & ((1 << GEM_##name##_SIZE) - 1))
-#define GEM_BFINS(name, value, old)			\
-	(((old) & ~(((1 << GEM_##name##_SIZE) - 1)	\
-		    << GEM_##name##_OFFSET))		\
-	 | GEM_BF(name, value))
 
 /* Register access macros */
 #define macb_readl(port, reg)				\
@@ -770,14 +433,6 @@
 #define MACB_RX_FRMLEN_MASK			0xFFF
 #define MACB_RX_JFRMLEN_MASK			0x3FFF
 
-/* RX checksum offload disabled: bit 24 clear in NCFGR */
-#define GEM_RX_TYPEID_MATCH_OFFSET		22
-#define GEM_RX_TYPEID_MATCH_SIZE		2
-
-/* RX checksum offload enabled: bit 24 set in NCFGR */
-#define GEM_RX_CSUM_OFFSET			22
-#define GEM_RX_CSUM_SIZE			2
-
 #define MACB_TX_FRMLEN_OFFSET			0
 #define MACB_TX_FRMLEN_SIZE			11
 #define MACB_TX_LAST_OFFSET			15
@@ -800,25 +455,5 @@
 #define MACB_TX_WRAP_SIZE			1
 #define MACB_TX_USED_OFFSET			31
 #define MACB_TX_USED_SIZE			1
-
-#define GEM_TX_FRMLEN_OFFSET			0
-#define GEM_TX_FRMLEN_SIZE			14
-
-/* Buffer descriptor constants */
-#define GEM_RX_CSUM_NONE			0
-#define GEM_RX_CSUM_IP_ONLY			1
-#define GEM_RX_CSUM_IP_TCP			2
-#define GEM_RX_CSUM_IP_UDP			3
-
-/* limit RX checksum offload to TCP and UDP packets */
-#define GEM_RX_CSUM_CHECKED_MASK		2
-#define gem_writel_queue_TBQP(port, value, queue_num)	\
-	writel((value), (port)->regs + GEM_TBQP(queue_num))
-#define gem_writel_queue_TBQPH(port, value, queue_num)	\
-	writel((value), (port)->regs + GEM_TBQPH(queue_num))
-#define gem_writel_queue_RBQP(port, value, queue_num)	\
-	writel((value), (port)->regs + GEM_RBQP(queue_num))
-#define gem_writel_queue_RBQPH(port, value, queue_num)	\
-	writel((value), (port)->regs + GEM_RBQPH(queue_num))
 
 #endif /* __DRIVERS_MACB_H__ */
