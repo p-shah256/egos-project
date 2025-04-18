@@ -10,4 +10,4 @@ tags
 *.mcs
 *.img
 tap_reader
-tap_writer
+tap_tester

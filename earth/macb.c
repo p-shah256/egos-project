@@ -262,11 +262,6 @@ void delay(int itrs) {
 }
 
 void macb_send(int length, void *packet) {
-	printf("Sending packet of length %d\n", length);
-	printf("Contents: ");
-	for (int i = 0; i < length; i++) {
-		printf("%02x ", ((unsigned char *)packet)[i]);
-	}
 	unsigned long ctrl;
 	unsigned int tx_head = macb.tx_head;
 	int i;
@@ -356,7 +351,6 @@ int _macb_recv(void *packetp) {
 
 		status = macb.rx_ring[next_rx_tail].ctrl;
 		if (status & MACB_BIT(RX_SOF)) {
-			printf("MACB: Receiving packet, Contents: \n");
 			if (next_rx_tail != macb.rx_tail)
 				reclaim_rx_buffers(next_rx_tail);
 			macb.wrapped = 0;
@@ -393,45 +387,6 @@ int _macb_recv(void *packetp) {
 	}
 }
 
-void macb_test() {
-	m_uint8 dummy_frame[60] = {
-		// Destination MAC (Broadcast)
-		0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-
-		// Source MAC (your device's MAC)
-		0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
-
-		// Ethertype (0x88B5 = Dummy/Experimental)
-		0x88, 0xB5,
-
-		// Payload (46 bytes of arbitrary data)
-		'H', 'E', 'L', 'L', 'O', '-', 'F', 'R', 'O', 'M', '-', 'G', 'E', 'M', '-', 'D',
-		'U', 'M', 'M', 'Y', '-', 'P', 'A', 'C', 'K', 'E', 'T', '-', 'T', 'E', 'S', 'T',
-		'-', 'Y', 'A', 'Y', '!', ' ', 'i', 't', 'r', ':', ' ', 0x00, 0x00,
-	};
-	int itr = 5;
-	for (int i = 0;i < 5;++i) {
-		dummy_frame[58] = ('1' + i);
-		macb_send(60, &dummy_frame);
-	}
-
-	int num = 0;
-	unsigned char buffer[2000];
-	unsigned char* recv_buffer = buffer;
-	while(1) {
-		num = _macb_recv(&recv_buffer);
-		reclaim_rx_buffers(macb.next_rx_tail);
-		if (num > 0) {
-			printf("Received: %d bytes\n", num);
-			for (int i = 0;i < num;++i) {
-				printf("%c", buffer[i]);
-			}
-			printf("\n");
-		}
-		delay(1e5);
-	}
-}
-
 #define MAX_TIME 1e3
 
 int macb_recv(void* buffer) {
@@ -462,14 +417,55 @@ int _macb_write_hwaddr()
 	return 0;
 }
 
+void macb_test() {
+	m_uint8 dummy_frame[60] = {
+		// Destination MAC (Broadcast)
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+
+		// Source MAC (your device's MAC)
+		0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
+
+		// Ethertype (0x88B5 = Dummy/Experimental)
+		0x88, 0xB5,
+
+		// Payload (46 bytes of arbitrary data)
+		'H', 'E', 'L', 'L', 'O', '-', 'F', 'R', 'O', 'M', 
+		'-', 'M', 'A', 'C', 'B', '-', 'D', 'U', 'M', 'M', 
+		'Y', '-', 'P', 'A', 'C', 'K', 'E', 'T', '-', 'T', 
+		'E', 'S', 'T', '-', 'Y', 'A', 'Y', '!', ' ', 'R', 
+		'/', 'W', '@', '$', 0x00, 0x00
+	};
+	macb_send(60, &dummy_frame);
+
+	unsigned char buffer[100];
+	
+	int timeout = 10;
+	int flag = 0;
+	while(timeout--) {
+		int num = macb_recv(&buffer);
+		if (num < 0) {
+			continue;
+		}
+		flag = 1;
+		if (memcmp(buffer, dummy_frame, 60)) {
+			FATAL("Incorrect bytes in the frame");
+		}
+		break;
+	}
+
+	ASSERT(flag == 1, "Failed to receive data in given time");
+}
+
 void macb_init() {
 
 #ifdef NETON
 	macb_probe();
 	_macb_write_hwaddr();
 	macb_start();
-	//	macb_test();
-	//	SUCCESS("Finished TEST successfully");
+	#ifdef MACBTESTON
+		macb_test();
+		SUCCESS("Passed MACB test!");
+	#endif
 #endif
 
 	earth->net_send = macb_send;
