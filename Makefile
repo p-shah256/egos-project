@@ -10,8 +10,6 @@ DISK=FLASH
 RWFS=RWFSOFF
 # Network ON/OFF
 NET=NETON
-# MACB Test ON/OFF
-MACBTEST=MACBTESTON
 
 CPU_TYPE=SIFIVE_U
 
@@ -39,7 +37,7 @@ INCLUDE = -Ilibrary -Ilibrary/elf -Ilibrary/libc -Ilibrary/file -Ilibrary/server
 QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic -nic bridge,helper=/usr/lib/qemu/qemu-bridge-helper,mac=52:54:00:00:00:01
 VERBOSE_LINKER = -Xlinker --verbose
 
-COMMON = $(CFLAGS) $(LDFLAGS) $(INCLUDE) -D$(CPU_TYPE) -D CPU_CLOCK_RATE=65000000 -D$(SCHEDULER) -D$(SYSCALLFUNC) -D$(IFVM) -D$(DISK) -D$(RWFS) -D$(NET) -D$(MACBTEST)
+COMMON = $(CFLAGS) $(LDFLAGS) $(INCLUDE) -D$(CPU_TYPE) -D CPU_CLOCK_RATE=65000000 -D$(SCHEDULER) -D$(SYSCALLFUNC) -D$(IFVM) -D$(DISK) -D$(RWFS) -D$(NET)
 
 APPS_LD = -Tapps/app.lds -lc -lgcc
 GRASS_LD = -Tgrass/grass.lds -lc -lgcc

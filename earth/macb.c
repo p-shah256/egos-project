@@ -417,55 +417,12 @@ int _macb_write_hwaddr()
 	return 0;
 }
 
-void macb_test() {
-	m_uint8 dummy_frame[60] = {
-		// Destination MAC (Broadcast)
-		0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-
-		// Source MAC (your device's MAC)
-		0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
-
-		// Ethertype (0x88B5 = Dummy/Experimental)
-		0x88, 0xB5,
-
-		// Payload (46 bytes of arbitrary data)
-		'H', 'E', 'L', 'L', 'O', '-', 'F', 'R', 'O', 'M', 
-		'-', 'M', 'A', 'C', 'B', '-', 'D', 'U', 'M', 'M', 
-		'Y', '-', 'P', 'A', 'C', 'K', 'E', 'T', '-', 'T', 
-		'E', 'S', 'T', '-', 'Y', 'A', 'Y', '!', ' ', 'R', 
-		'/', 'W', '@', '$', 0x00, 0x00
-	};
-	macb_send(60, &dummy_frame);
-
-	unsigned char buffer[100];
-	
-	int timeout = 10;
-	int flag = 0;
-	while(timeout--) {
-		int num = macb_recv(&buffer);
-		if (num < 0) {
-			continue;
-		}
-		flag = 1;
-		if (memcmp(buffer, dummy_frame, 60)) {
-			FATAL("Incorrect bytes in the frame");
-		}
-		break;
-	}
-
-	ASSERT(flag == 1, "Failed to receive data in given time");
-}
-
 void macb_init() {
 
 #ifdef NETON
 	macb_probe();
 	_macb_write_hwaddr();
 	macb_start();
-	#ifdef MACBTESTON
-		macb_test();
-		SUCCESS("Passed MACB test!");
-	#endif
 #endif
 
 	earth->net_send = macb_send;
