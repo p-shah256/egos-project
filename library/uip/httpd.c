@@ -1,81 +1,83 @@
+#include "egos.h"
 #include "uip.h"
 #include <string.h>
 
-// Simple HTTP "Hello World" response
+// HTTP "Hello World" response - the whole damn thing in one piece
 static const char *hello_response = "HTTP/1.0 200 OK\r\n"
                                     "Content-Type: text/plain\r\n"
                                     "Connection: close\r\n"
                                     "\r\n"
                                     "Hello World!\r\n";
 
-#define STATE_WAITING 0
-#define STATE_OUTPUT  1
-
-static PT_THREAD(handle_output(struct httpd_state *s)) {
-    PT_BEGIN(&s->outputpt);
-
-    // Send our complete hello_response directly
-    PSOCK_BEGIN(&s->sout);
-    PSOCK_SEND_STR(&s->sout, hello_response);
-    PSOCK_CLOSE(&s->sout);
-    PSOCK_END(&s->sout);
-
-    PT_END(&s->outputpt);
-}
-
-static PT_THREAD(handle_input(struct httpd_state *s)) {
-    PSOCK_BEGIN(&s->sin);
-
-    // We just need to consume the incoming HTTP request
-    // No need to parse it since we'll respond with Hello World regardless
-    PSOCK_READTO(&s->sin, '\n');
-    // Set state to output so we respond with Hello World
-    s->state = STATE_OUTPUT;
-    while (1) { // Skip the rest of the HTTP headers
-        PSOCK_READTO(&s->sin, '\n');
-        if (s->inputbuf[0] == '\r' || s->inputbuf[0] == '\n') {
-            break;
-        }
-    }
-    PSOCK_END(&s->sin);
-}
-
-static void handle_connection(struct httpd_state *s) {
-    handle_input(s);
-    if (s->state == STATE_OUTPUT) {
-        handle_output(s);
-    }
-}
+#define HTTP_STATE_WAITING 0 // Waiting for request
+#define HTTP_STATE_SENDING 1 // Sending response
+#define HTTP_STATE_CLOSING 2 // Closing connection
 
 void httpd_appcall(void) {
-    struct httpd_state *s = (struct httpd_state *)&(uip_conn->appstate);
-
-    if (uip_closed() || uip_aborted() || uip_timedout()) {
-        // Connection closed, nothing to do
-    } else if (uip_connected()) {
-        // New connection
-        PSOCK_INIT(&s->sin, s->inputbuf, sizeof(s->inputbuf) - 1);
-        PSOCK_INIT(&s->sout, s->inputbuf, sizeof(s->inputbuf) - 1);
-        PT_INIT(&s->outputpt);
-        s->state = STATE_WAITING;
+    struct http_state *s = (struct http_state *)&(uip_conn->appstate);
+    if (uip_connected()) { // Handle connection state changes
+        // Just connected - initialize state
+        s->state = HTTP_STATE_WAITING;
         s->timer = 0;
-        handle_connection(s);
-    } else if (s != NULL) {
-        // Existing connection
-        if (uip_poll()) {
-            ++s->timer;
-            if (s->timer >= 20) {
-                uip_abort(); // Timeout after 20 polls
-            }
-        } else {
-            s->timer = 0;
+    } else if (uip_closed() || uip_aborted() || uip_timedout()) {
+        // Connection is gone, nothing to do
+        return;
+    }
+
+    // Handle polling (timeout checking)
+    if (uip_poll()) {
+        // Increment timeout counter
+        s->timer++;
+        if (s->timer >= 20) { // About 20 seconds at typical poll rate
+            uip_abort();
+            return;
         }
-        handle_connection(s);
     } else {
-        uip_abort(); // Invalid state
+        // Reset timer on activity
+        s->timer = 0;
+    }
+
+    switch (s->state) { // Process current state
+    case HTTP_STATE_WAITING:
+        if (uip_newdata()) { // Got request data - don't even bother parsing, just respond
+            s->state = HTTP_STATE_SENDING;
+            s->send_pos = 0;
+            s->send_left = strlen(hello_response);
+            // Fall through to sending state
+        } else {
+            // Still waiting for data
+            break;
+        }
+
+    case HTTP_STATE_SENDING:
+        if (uip_acked()) { // Last data was acknowledged, update position
+            m_uint8 acked = uip_conn->len;
+            if (acked > s->send_left)
+                acked = s->send_left;
+
+            s->send_pos += acked;
+            s->send_left -= acked;
+
+            if (s->send_left == 0) { // All sent, go to closing state
+                s->state = HTTP_STATE_CLOSING;
+                uip_close();
+                return;
+            }
+        }
+
+        if (uip_rexmit() || uip_newdata() || uip_acked() || uip_poll()) { // Send more data if possible
+            if (s->send_left > 0) {
+                uip_send(hello_response + s->send_pos, s->send_left);
+            }
+        }
+        break;
+
+    case HTTP_STATE_CLOSING: // Just waiting for connection to close
+        break;
     }
 }
 
 void httpd_init(void) {
-    uip_listen(HTONS(80)); // Listen on port 80
+    // Just listen on port 80
+    uip_listen(HTONS(80));
 }

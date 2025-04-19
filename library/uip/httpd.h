@@ -36,6 +36,7 @@
 #define __HTTPD_H__
 
 // #include "httpd-fs.h"
+#include "egos.h"
 #include "psock.h"
 
 struct httpd_state {
@@ -52,6 +53,14 @@ struct httpd_state {
 
     unsigned short count;
 };
+
+struct http_state {
+    m_uint8 state;         // Current state
+    m_uint16 timer;        // Simple timer for timeouts
+    m_uint16 send_pos;     // Position in response string
+    m_uint16 send_left;    // Bytes left to send
+};
+
 
 void httpd_init(void);
 void httpd_appcall(void);
