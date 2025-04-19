@@ -4,13 +4,7 @@
 #include "macb.h"
 #include "string.h"
 
-/*
- * These buffer sizes must be power of 2 and divisible
- * by RX_BUFFER_MULTIPLE
- */
 #define MACB_RX_BUFFER_SIZE		128
-#define GEM_RX_BUFFER_SIZE		2048
-#define RX_BUFFER_MULTIPLE		64
 
 #define MACB_RX_RING_SIZE		32
 #define MACB_TX_RING_SIZE		16
@@ -47,7 +41,6 @@ struct macb_device {
 	int			wrapped;
 
 	void			*rx_buffer;
-	void			*tx_buffer;
 	struct macb_dma_desc	*rx_ring;
 	struct macb_dma_desc	*tx_ring;
 	int			rx_buffer_size;
@@ -96,7 +89,6 @@ void macb_probe() {
 	macb.pclk_rate = QUANTUM; //  Configure based on the inputs
 
 	macb.rx_buffer_size = MACB_RX_BUFFER_SIZE;
-	// Malloc with DMA aligned sync it with D-cache line size ?
 	macb.rx_buffer = alloc_aligned(macb.rx_buffer_size * MACB_RX_RING_SIZE, &macb.rx_buffer_dma[1]);
 	macb.rx_buffer_dma[0] = (m_uint32)macb.rx_buffer;
 
@@ -230,7 +222,7 @@ void macb_start() {
 	}
 	// Flush RX ring dma desc if cache is available
 	// Flush RX buffer if cache is available
-	
+
 	for (i = 0; i < MACB_TX_RING_SIZE; i++) {
 		macb.tx_ring[i].addr = 0;
 		if (i == (MACB_TX_RING_SIZE - 1))
@@ -286,10 +278,8 @@ void macb_send(int length, void *packet) {
 		barrier();
 		// Invalidate cache for TX ring dma desc to get the latest data from memory if cache is present
 		ctrl = macb.tx_ring[tx_head].ctrl;
-		// INFO("Test Is Used: %u", (ctrl & MACB_BIT(TX_USED)));
 		if (ctrl & MACB_BIT(TX_USED))
-			// INFO("Used %d", i);
-		break;
+			break;
 		delay(BUSY_LOOP);
 	}
 
@@ -410,7 +400,7 @@ int _macb_write_hwaddr()
 
 	/* set hardware address */
 	hwaddr_bottom = enetaddr[0] | enetaddr[1] << 8 |
-			enetaddr[2] << 16 | enetaddr[3] << 24;
+		enetaddr[2] << 16 | enetaddr[3] << 24;
 	macb_writel(macb, SA1B, hwaddr_bottom);
 	hwaddr_top = enetaddr[4] | enetaddr[5] << 8;
 	macb_writel(macb, SA1T, hwaddr_top);
