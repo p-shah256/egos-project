@@ -55,11 +55,10 @@ struct httpd_state {
 };
 
 struct http_state {
-    m_uint8 state;         // Current state
-    m_uint16 timer;        // Simple timer for timeouts
-    m_uint16 send_pos;     // Position in response string
-    m_uint16 send_left;    // Bytes left to send
+    m_uint8 state;
+    m_uint16 pos;
 };
+
 
 
 void httpd_init(void);
@@ -68,7 +67,7 @@ void httpd_appcall(void);
 // void httpd_log(char *msg);
 // void httpd_log_file(u16_t *requester, char *file);
 
-typedef struct httpd_state uip_tcp_appstate_t;
+typedef struct http_state uip_tcp_appstate_t;
 /* UIP_APPCALL: the name of the application function. This function
    must return void and take no arguments (i.e., C type "void
    appfunc(void)"). */

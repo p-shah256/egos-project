@@ -309,14 +309,12 @@ uip_arp_arpin(void)
 
       BUF->ethhdr.type = HTONS(UIP_ETHTYPE_ARP);
       uip_len = sizeof(struct arp_hdr);
-      uip_log("ARP_REQUEST: asked for our address - Contents:");
     }
     break;
   case HTONS(ARP_REPLY):
     /* ARP reply. We insert or update the ARP table if it was meant
        for us. */
     if(uip_ipaddr_cmp(BUF->dipaddr, uip_hostaddr)) {
-      uip_log("ARP_REPLY: replied to our request - Contents:");
       uip_arp_update(BUF->sipaddr, &BUF->shwaddr);
     }
     break;

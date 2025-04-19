@@ -12,11 +12,6 @@
  */
 
 /*
- * This is a short example of how to write uIP applications using
- * protosockets.
- */
-
-/*
  * We define the application state (struct hello_world_state) in the
  * hello-world.h file, so we need to include it here. We also include
  * uip.h (since this cannot be included in hello-world.h) and
@@ -27,6 +22,10 @@
 #include <string.h>
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
+
+#ifndef NULL
+#define NULL (void *)0
+#endif /* NULL */
 
 void print_content(int uip_len);
 
@@ -39,6 +38,7 @@ int main(void) {
     // timer_set(&arp_timer, CLOCK_SECOND * 10);
 
     uip_init();
+    uip_log("uIP initialized");
 
     uip_ipaddr(ipaddr, 192, 168, 0, 2);
     uip_sethostaddr(ipaddr);
@@ -48,18 +48,14 @@ int main(void) {
     uip_setnetmask(ipaddr);
 
     httpd_init();
-    /* Initialize the uIP TCP/IP stack */
-    uip_init();
-
-    uip_log("uIP started");
 
     while (1) {
         uip_len = net_recv((char *)uip_buf);
         if (uip_len > 0) {
 
             if (BUF->type == htons(UIP_ETHTYPE_IP)) {
-                CRITICAL("IP packet received");
-                print_content(uip_len);
+                // CRITICAL("IP packet received");
+                // print_content(uip_len);
 
                 uip_arp_ipin();
                 uip_input();
@@ -67,23 +63,23 @@ int main(void) {
                    should be sent out on the network, the global variable
                    uip_len is set to a value > 0. */
                 if (uip_len > 0) {
-                    CRITICAL("Sending IP packet");
-                    print_content(uip_len);
+                    // CRITICAL("Sending IP packet");
+                    // print_content(uip_len);
 
                     uip_arp_out();
                     net_send(uip_len, (char *)uip_buf);
                 }
             } else if (BUF->type == htons(UIP_ETHTYPE_ARP)) {
-                CRITICAL("ARP recieved");
-                print_content(uip_len);
+                // CRITICAL("ARP recieved");
+                // print_content(uip_len);
 
                 uip_arp_arpin();
                 /* If the above function invocation resulted in data that
                    should be sent out on the network, the global variable
                    uip_len is set to a value > 0. */
                 if (uip_len > 0) {
-                    CRITICAL("sending ARP reply");
-                    print_content(uip_len);
+                    // CRITICAL("sending ARP reply");
+                    // print_content(uip_len);
 
                     net_send(uip_len, (char *)uip_buf);
                 }
