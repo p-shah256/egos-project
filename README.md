@@ -17,6 +17,7 @@
   ```
   sudo chmod u+s /usr/lib/qemu/qemu-bridge-helper
   mkdir /etc/qemu
+  sudo chmod 755 /etc/qemu
   touch /etc/qemu/bridge.conf
   sudo chmod 644 /etc/qemu/bridge.conf
   echo "allow br0" | sudo tee -a /etc/qemu/bridge.conf
