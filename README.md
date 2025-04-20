@@ -1,52 +1,44 @@
-## Core Parts MACB
+# Requirements
+- Linux machine is required for the project to work.
+- macOS does not provide support to create tap interfaces which is an essential requirement for this project to work.
+- We recommend using Ubuntu. The following mentioned steps work for ubuntu but similar commands should work for other distros as well.
 
-<img width="706" alt="GEMGXL Management TX Clock Select Register" src="https://github.com/user-attachments/assets/bfe7e84b-006b-464e-b810-b08e99108700" />
+# Installation and Setup
+- Clone this repository in proper OSI directory
+- Ensure that you have commented out the qemu path in env.sh (We would need the custom qemu installation for this)
+  
+- Install qemu on your machine
+  ```
+  apt-get install qemu-system
+  ```
+  
+- We would be using bridge helper to communicate from our qemu guest OS (EGOS) with the host OS via a bridge br0.
+- Perform below mentioned commands to setup bridge helper properly
+  ```
+  sudo chmod u+s /usr/lib/qemu/qemu-bridge-helper
+  mkdir /etc/qemu
+  touch /etc/qemu/bridge.conf
+  sudo chmod 644 /etc/qemu/bridge.conf
+  echo "allow br0" | sudo tee -a /etc/qemu/bridge.conf
+  ```
 
-<img width="682" alt="Table 123 GEMGXL Management Control Status Speed Mode Register" src="https://github.com/user-attachments/assets/ea787c82-fa31-4d33-b557-b1b54dd51526" />
+- Create a bridge on host OS
+  ```
+  sudo ip link add br0 type bridge
+  sudo ip link set dev br0 up
+  sudo ip addr add 192.168.0.1/24 dev br0
+  ```
 
-### GEMGXL Control Registers (0x1009_0000 – 0x1009_1FFF)
+- Create tap2 on host (for testing)
+  ```
+  sudo apt-get install bridge-utils
+  sudo ip tuntap add mode tap tap2
+  sudo brctl addif br0 tap2
+  sudo ip link set dev tap2 up
+  ```
 
-Reference: https://github.com/u-boot/u-boot/blob/master/doc/develop/driver-model/ethernet.rst
-
-Doc: https://pix-server-sorel.luoss.fr/Manual/Pi/GigabitEthernetMAC%28GEM%29-TechnicalDataSheet-Cadence.pdf
-
-SiFive: https://naizhengtan.github.io/25spring/docs/sifive-fu540-v1p4.pdf
-
-Register Offsets: https://github.com/u-boot/u-boot/blob/master/drivers/net/macb.h
-
-- [ ] Probe
-- Finalize on PHY interface (MII/GMII)
-- Enable/Setup clk
-- Allocate buffers and DMA desc
-
-- [ ] Start
-- Initialize DMA desc
-- Write RX and TX desc in required regs RBQP and TBQP
-- Setup PHY and update ETH controller
-- Enable TX and RX.
-
-For the initial implementation we will focus on implementing send and receive as synchronous operations rather than async with interrupts. If time permits will move on to PLIC.
-
-- [ ] Send
-- Setup of ctrl and desc addr in TX desc to indicate the buffer to use.
-- Wait for a while till the desc is used with some timeout
-- Based on the result log success/failure
-
-- [ ] Recv
-- Clean up of buffers if required
-- Find SOF and EOF
-- Calculate length and copy data from buffers
-
-- [ ] Free Packet
-- reclaim RX buffers
-
-- [ ] Stop
-- HALT the controller and wait for pending TXs
-- Disable TX and RX
-
-- [ ] write_hwaddr (Optional)
-- Write MAC address into ethernet controller using SA1B and SA1T regs.
-
-## TCP/IP
-
-uIP vs lwIP ?
+- Verify tap and bridge are setup properly
+  ```
+  sudo ip link
+  sudo ip addr
+  ```
