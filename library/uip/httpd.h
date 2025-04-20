@@ -35,24 +35,7 @@
 #ifndef __HTTPD_H__
 #define __HTTPD_H__
 
-// #include "httpd-fs.h"
 #include "egos.h"
-#include "psock.h"
-
-struct httpd_state {
-    unsigned char timer;
-    struct psock sin, sout;
-    struct pt outputpt, scriptpt;
-    char inputbuf[50];
-    char filename[20];
-    char state;
-    // struct httpd_fs_file file;
-    int len;
-    char *scriptptr;
-    int scriptlen;
-
-    unsigned short count;
-};
 
 struct http_state {
     m_uint8 state;
