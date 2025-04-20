@@ -6,6 +6,9 @@
 #include <string.h>
 
 int main(int argc, char** argv) {
+	#ifndef NETON
+		FATAL("MACB is not turned ON!");
+	#endif
 	if (argc != 1) {
 		INFO("usage: macb_test");
 		return -1;

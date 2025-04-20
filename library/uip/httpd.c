@@ -6,13 +6,14 @@ static const char *hello_response = "HTTP/1.0 200 OK\r\n"
                                     "Content-Type: text/html\r\n"
                                     "Connection: close\r\n"
                                     "\r\n"
-                                    "<h1> EgOS is ALIVE! First contact established! </h1>\n"
+                                    "<h1> EGOS is ALIVE! First contact established! </h1>\n"
                                     "<p> This is a simple HTTP server response. </p> \n"
                                     " ███████  ██████   ██████  ███████ \n"
                                     " ██      ██       ██    ██ ██      \n"
                                     " █████   ██   ███ ██    ██ ███████ \n"
                                     " ██      ██    ██ ██    ██      ██ \n"
-                                    " ███████  ██████   ██████  ███████ \n";
+                                    " ███████  ██████   ██████  ███████ \n\n"
+                                    "Authors: Pranchal Shah and Vasu Kalariya\n";
 
 #define HTTP_STATE_WAITING 0
 #define HTTP_STATE_SENDING 1

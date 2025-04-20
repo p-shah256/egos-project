@@ -82,6 +82,7 @@ struct dir_reply {
     int ino;
 };
 
+// TODO: Increase the buf size from 256 to 512
 /* GPID_NET */
 struct net_request {
     enum {

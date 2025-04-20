@@ -26,11 +26,8 @@ struct macb_dma_desc {
 struct macb_device {
 	void* base;
 
-	const struct macb_config* config;
-
 	unsigned int rx_tail;
 	unsigned int tx_head;
-	unsigned int tx_tail;
 	unsigned int next_rx_tail;
 	int          wrapped;
 
@@ -39,6 +36,10 @@ struct macb_device {
 	struct macb_dma_desc* tx_ring;
 	int                   rx_buffer_size;
 
+	// We are storing 2 values because we are using alignment
+	// 0th index: aligned start address
+	// 1th index: actual start address of allocated memory
+	// Need to store actual start address if this needs to be freed later.
 	m_uint32 rx_buffer_dma[2];
 	m_uint32 rx_ring_dma[2];
 	m_uint32 tx_ring_dma[2];
@@ -67,6 +68,7 @@ m_uint32 macb_mdc_clk_div(unsigned long macb_hz)
 	return config;
 }
 
+// Store the actual start address in the handle and return the aligned address
 void* alloc_aligned(m_uint32 size, m_uint32* handle)
 {
 	int   offset = ARCH_DMA_MINALIGN - 1;
@@ -231,7 +233,6 @@ void macb_start()
 
 	macb.rx_tail      = 0;
 	macb.tx_head      = 0;
-	macb.tx_tail      = 0;
 	macb.next_rx_tail = 0;
 
 	macb_writel(macb, RBQP, macb.rx_ring_dma[0]);
@@ -247,8 +248,7 @@ void macb_start()
 
 void delay(int itrs)
 {
-	for (int i = 0; i < itrs; ++i)
-		;
+	for (int i = 0; i < itrs; ++i);
 }
 
 void macb_send(int length, void* packet)
@@ -378,17 +378,19 @@ int _macb_recv(void* packetp)
 	}
 }
 
-#define MAX_TIME 1e3
+#define MAX_RX_TRIES 10
 
+// Just trying _macb_recv for multiple times as an optimization
+// to reduce syscalls from user app, as soon as we get a packet we return
 int macb_recv(void* buffer)
 {
-	for (int i = 0; i < MAX_TIME; ++i) {
+	for (int i = 0; i < MAX_RX_TRIES; ++i) {
 		int num = _macb_recv(buffer);
 		if (num > 0) {
 			reclaim_rx_buffers(macb.next_rx_tail);
 			return num;
 		}
-		delay(1e5);
+		delay(1e7);
 	}
 
 	return -1;
