@@ -90,11 +90,11 @@ struct net_request {
         NET_RECV
     } type;
     int length;
-    char buf[256];
+    char buf[512];
 };
 
 struct net_reply {
     enum net_status { NET_OK, NET_ERROR } status;
     int length;
-    char buf[256];
+    char buf[512];
 };

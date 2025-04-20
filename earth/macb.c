@@ -350,7 +350,7 @@ int _macb_recv(void* packetp)
 		if (status & MACB_BIT(RX_EOF)) {
 			buffer = macb.rx_buffer + macb.rx_buffer_size * macb.rx_tail;
 			length = status & RXBUF_FRMLEN_MASK;
-			ASSERT(length < 256, "Cannot handle packets more than 256 bytes right now!");
+			ASSERT(length < 512, "Cannot handle packets more than 512 bytes right now!");
 
 			// Invalidate RX buffer if cache is available
 			if (macb.wrapped) {
