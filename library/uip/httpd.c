@@ -3,24 +3,24 @@
 #include <string.h>
 
 static const char *hello_response = "HTTP/1.0 200 OK\r\n"
-                                    "Content-Type: text/plain\r\n"
+                                    "Content-Type: text/html\r\n"
                                     "Connection: close\r\n"
                                     "\r\n"
-                                    "*** EgOS is ALIVE! First contact established! ***\n"
-                                    "This is line 2.\n" // Added more data to ensure chunking
-                                    "This is line 3.\n"
-                                    "This is line 4.\n"
-                                    "This is line 5, making it longer than a small MSS.\n"
-                                    "Line 6 here.\n"
-                                    "Line 7 is almost the end.\n"
-                                    "Finally, Line 8.\n";
-#define HTTP_STATE_WAITING    0
-#define HTTP_STATE_SENDING    1
-#define HTTP_STATE_CLOSING    2
+                                    "<h1> EgOS is ALIVE! First contact established! </h1>\n"
+                                    "<p> This is a simple HTTP server response. </p> \n"
+                                    " ███████  ██████   ██████  ███████ \n"
+                                    " ██      ██       ██    ██ ██      \n"
+                                    " █████   ██   ███ ██    ██ ███████ \n"
+                                    " ██      ██    ██ ██    ██      ██ \n"
+                                    " ███████  ██████   ██████  ███████ \n";
+
+#define HTTP_STATE_WAITING 0
+#define HTTP_STATE_SENDING 1
+#define HTTP_STATE_CLOSING 2
 
 // UIP will add the overhead of the TCP/IP stack, so we need to ensure
 // we don't exceed that
-#define MAX_DRIVER_SEND_BYTES 256 - 40
+#define MAX_DRIVER_SEND_BYTES 256 - 100
 
 void httpd_appcall(void) {
     struct http_state *s = (struct http_state *)&(uip_conn->appstate);
