@@ -56,10 +56,11 @@ struct httpd_state {
 
 struct http_state {
     m_uint8 state;
+    const char *data_ptr;
+    m_uint16 total_len;
     m_uint16 pos;
+    m_uint16 last_sent_len;
 };
-
-
 
 void httpd_init(void);
 void httpd_appcall(void);
