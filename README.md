@@ -43,3 +43,13 @@
   sudo ip link
   sudo ip addr
   ```
+- Compile tap tester
+  ```
+  gcc -o tap_tester tap_tester.c
+  ```
+
+- Refer the demo video for more info. Please let us know if there are issues while setting/testing it up.
+
+  References:
+  - https://github.com/u-boot/u-boot
+  - https://github.com/adamdunkels/uip
