@@ -60,7 +60,7 @@ static const char *hello_response = "HTTP/1.0 200 OK\r\n"
 
 // UIP will add the overhead of the TCP/IP stack, so we need to ensure
 // we don't exceed that
-#define MAX_DRIVER_SEND_BYTES 256 - 100
+#define MAX_DRIVER_SEND_BYTES 512 - 100
 
 void httpd_appcall(void) {
     struct http_state *s = (struct http_state *)&(uip_conn->appstate);

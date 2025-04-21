@@ -88,7 +88,7 @@ int net_send(int length, char* packet) {
     struct net_request req;
     req.type = NET_SEND;
     req.length = length;
-    ASSERT(length < 256, "Cannot send packet more than 256");
+    ASSERT(length <= 512, "Cannot send packet more than 512");
     memcpy(req.buf, packet, length);
     grass->sys_send(GPID_NET, (void*)&req, sizeof(req));
 
