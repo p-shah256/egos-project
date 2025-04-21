@@ -1,0 +1,87 @@
+Title: Ethernet support with TCP/IP in egos
+----------------------------------------------------
+Author(s): Vasu Rameshbhai Kalariya and Pranchal Shah
+----------------------------------------------------
+
+Description:
+----------------------------------------------------
+  Currently egos does have any support for networking, which is a very important feature for modern operating systems. This project aims to add networking support to egos and will implement the TCP/IP stack.
+  This project is interesting because it will allow egos to communicate with other systems, and it's a good learning opportunity to write a driver and understand how networking works.
+  We will implement a simple network driver for the SiFive FU540-C000. The project will be implemented in the following steps:
+  1) implement the network driver,
+  2) implement the TCP/IP stack,
+  3) implement the socket API.
+  Our stretch goal is to implement PLIC support for the network driver.
+
+Setup:
+----------------------------------------------------
+  Target CPU: sifive_u
+  Previous labs: none
+  Commit id: 6dfa07d4b258c58d34dac96a3a858a46c3f72d46
+  Relevant details: 
+  - The project is based on the egos-upstream lab-7 branch.
+  - We didn't want to share each others work so we created a new repository and started from the lab-7 branch.
+    https://github.com/p-shah256/egos-project
+
+Core implementation:
+----------------------------------------------------
+  - macb.h: This file is a header file that contains macb macros and constants for the MACB Ethernet controller. It defines the register offsets, bit masks, and other constants used in the driver implementation.
+  - macb.c: Contains the implementation of the MACB Ethernet controller driver. It includes functions for initializing the driver, configuring the hardware, and handling interrupts.
+  - server.c: Implementation of the system call interface for the network driver.
+  - server.h: syscall request and reply definitions.
+  - sys_net.c: kernel process serving netsend and netrecv syscalls.
+  - http.c: A user app that works as a webserver.
+  - uip.c: Core implementation of the TCP/IP stack.
+  - uip.h: Header file for the TCP/IP stack.
+(note these are just the core files, other files are not included. They can be found at library/uip)
+
+Benchmarks:
+----------------------------------------------------
+- tap_tester.c: This file creates uses a tap interface to receive a single frame and send the same frame back. (this is not a app in egos)
+- macb_test.c: A user app that tests the MACB Ethernet controller driver. 
+- http.c : A user app that works as a webserver. and tests the whole tcp ip stack.
+
+Evaluation:
+----------------------------------------------------
+Please refer the README file for setting up the network interfaces(br, tap) and running the tests.
+
+- MACB AND SYSCALL EVALUATION:
+files inolved: tap_tester.c, macb.c, server.c, sys_net.c
+evaluation: verify that the driver can successfully send and receive frames via sys_net.
+Steps:
+1. create network interfaces as described in README
+2. in one terminal, compile and run tap_tester with root privileges 
+3. another terminal, make and boot egos and run macb_test
+4. send and recv test passed should be printed in the terminal
+How it works:
+1. macb_test: broadcasts a dummy frame to tap_tester
+2. tap_tester: reads the response
+3. tap_tester: sends the what it received back
+4. macb_test: checks the response is same as what it sent previously. If it is, it means the driver is working correctly.
+
+- TCP/IP STACK EVALUATION:
+files inolved: http.c, uip.c, uip.h, sys_net.c, and all files in library/uip
+evaluation: verify that the TCP/IP stack can successfully send and receive TCP packets, IP packets, ARP packets, and ICMP packets.
+Steps:
+1. create network interfaces as described in README
+2. in one terminal, compile and run http
+3. in other window, try curl http://192.168.0.2 and ping 192.168.0.2
+4. ping should send and recv ICMP packets
+5. curl should return a HTML page
+How it works:
+1. http: starts a web server and waits for requests
+2. curl: sends a request to the web server
+3. http: reads the request
+4. http: sends the HTML page back
+5. ping: sends an ICMP request to the web server
+6. http: receives the ICMP request and sends an ICMP response
+
+
+
+ GitHub repo and commit id:
+  *  git@github.com:NEU-CS6640-labs/egos-p-shah256.git
+  *  
+
+  MAIN REPOSITORY:
+  *  git@github.com:p-shah256/egos-project.git
+  *  6f9d0846d5901b2b77b65b58d2c702b4cc4a4c78
