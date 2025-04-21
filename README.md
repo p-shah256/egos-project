@@ -1,3 +1,6 @@
+> Please refer to the main repository here: [https://github.com/p-shah256/egos-project](https://github.com/p-shah256/egos-project) for more details and a clean project history.
+> Also if possible please use the main repository for compiling and using the project as this is just a mirror of that repository. Thanks!
+
 # Requirements
 - Linux machine is required for the project to work.
 - macOS does not provide support to create tap interfaces which is an essential requirement for this project to work.
