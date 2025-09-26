@@ -34,6 +34,7 @@ LDFLAGS = -Wl,--gc-sections -nostartfiles -nostdlib
 INCLUDE = -Ilibrary -Ilibrary/elf -Ilibrary/libc -Ilibrary/file -Ilibrary/servers
 # QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-e31.cfg -kernel $(QEMU)/qemu.elf -nographic
 # QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic
+# QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic -nic socket,listen=:1234
 QEMU_FLAGS = -bios none -readconfig $(QEMU)/sifive-u540.cfg -nographic -nic bridge,helper=/usr/lib/qemu/qemu-bridge-helper,mac=52:54:00:00:00:01
 VERBOSE_LINKER = -Xlinker --verbose
 
